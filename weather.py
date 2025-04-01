@@ -83,7 +83,9 @@ def writeLog(file, log_type):
     return
 
 def adjustDrivingEnv(data):
-    
+    if data:
+        traci.vehicle.slowDown(self, vehID, speed, duration)
+
 
 if __name__ == "__main__":
     #Initialize and get external data and adjust the environment first
@@ -109,6 +111,6 @@ if __name__ == "__main__":
             collision_list.append(traci.getCollidingVehiclesIDList())
     traci.close()
 
-    #Write log file base on whatever the fuck we got(not implement yet)
+    #Write log file base on whatever the fuck we got(not implemented yet)
 
     collision_file.close()
