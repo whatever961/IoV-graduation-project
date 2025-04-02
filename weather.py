@@ -82,11 +82,6 @@ def writeLog(file, log_type):
     pass
     return
 
-def adjustDrivingEnv(data):
-    if data:
-        traci.vehicle.slowDown(self, vehID, speed, duration)
-
-
 if __name__ == "__main__":
     #Initialize and get external data and adjust the environment first
     collision_list = []
@@ -99,8 +94,6 @@ if __name__ == "__main__":
                 os._exit(0)
             except:
                 print("die")
-
-    adjustDrivingEnv(ext_data)
 
     #Start simulation
     traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
