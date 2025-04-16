@@ -1,5 +1,4 @@
 import func
-import Driver
 
 # Define cloud weight mapping
 cloud_mapping = {
@@ -223,8 +222,38 @@ def setOption(weather_factor):
 def writeLog(file, log_type):
     pass
     return
-    
 
+# Callback when connected to the broker
+def on_connect(client, userdata, flags, rc, properties):
+    print("Connected with result code " + str(rc))
+    client.subscribe("dpgo/#")  # MQTT_sub from OBU(data path go)
+
+# Callback when a message is received
+def on_message(client, userdata, msg):
+    print(f"Message from {msg.topic}: {msg.payload.decode('utf-8')}")
+    
+    # MQTT_pub to OBU
+    # Set option
+    data = json.loads(msg.payload.decode('utf-8'))
+    option = setOption(weather_factor, data)
+    # Publish the message
+    client.publish('dpback', option)
+
+# Initialize the client
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.username_pw_set("rw", "readwrite")
+
+# Assign callbacks
+client.on_connect = on_connect
+client.on_message = on_message
+
+# Connect to the broker
+client.connect("127.0.0.1", 1883, 60)
+
+# Connect to the broker
+client.loop_forever()   # Change later
+
+'''
 if __name__ == "__main__":
     collision_list = []
     collision_file = open("collide_log", "ra")
@@ -254,3 +283,4 @@ if __name__ == "__main__":
     #Write log file base on whatever the fuck we got(not implement yet)
 
     collision_file.close()
+    '''
