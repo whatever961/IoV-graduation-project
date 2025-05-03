@@ -1,49 +1,5 @@
 import func
 
-# Define cloud weight mapping
-cloud_mapping = {
-    "晴": 1.0,
-    "多雲": 1.5,
-    "陰": 2.0
-}
-
-# Define weather condition weight mapping
-weather_mapping = {
-    "有霾": -0.02,
-    "有靄": -0.02,
-    "有閃電": -0.01,
-    "有雷聲": -0.01,
-    "有霧": -0.03,
-    "有雨": -0.03,
-    "有雨雪": -0.04,
-    "有大雪": -0.07,
-    "有雪珠": -0.05,
-    "有冰珠": -0.05,
-    "有陣雨": -0.01,
-    "陣雨雪": -0.03,
-    "有雹": -0.06,
-    "有雷雨": -0.08,
-    "有雷雪": -0.08,
-    "有雷雹": -0.08,
-    "大雷雨": -0.08,
-    "大雷雹": -0.08,
-    "有雷": -0.01,
-}
-
-#Use for option setting
-class Vehicle:
-    def __init__(self, vehID, slowDownSpeed, slowDownDuration, safeDist,
-                 accel, decel, speedMode, maxSpeed, response):
-        self.vehID = vehID
-        self.slowDown = [slowDownSpeed, slowDownDuration]
-        self.safeDist = safeDist
-        self.accel = accel
-        self.decel = decel
-        self.speedMode = speedMode
-        self.maxSpeed = maxSpeed
-        self.response = response
-
-
 """
 Used for connecting database,
 now only support mysql and postgresql
@@ -170,7 +126,7 @@ def OBUProcessData(cloud_data):
             visibility = "Unknown"
     weighted_weather = averageWeightedWeather(weather_string)
 
-"""
+    """
     total_10min = 0
     total_1hr = 0
     count = 0
@@ -182,7 +138,7 @@ def OBUProcessData(cloud_data):
         count += 1
     avg_10min = total_10min / count if count > 0 else 0
     avg_1hr = total_1hr / count if count > 0 else 0
-"""
+    """
     return weighted_weather
 
 
@@ -218,10 +174,6 @@ def setOption(weather_factor):
 
     return option
 
-
-def writeLog(file, log_type):
-    pass
-    return
 
 # Callback when connected to the broker
 def on_connect(client, userdata, flags, rc, properties):
