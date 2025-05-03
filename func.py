@@ -12,6 +12,51 @@ from io import StringIO
 import paho.mqtt.client as mqtt
 import time
 
+# Define cloud weight mapping
+cloud_mapping = {
+    "晴": 1.0,
+    "多雲": 1.5,
+    "陰": 2.0
+}
+
+# Define weather condition weight mapping
+weather_mapping = {
+    "有霾": -0.02,
+    "有靄": -0.02,
+    "有閃電": -0.01,
+    "有雷聲": -0.01,
+    "有霧": -0.03,
+    "有雨": -0.03,
+    "有雨雪": -0.04,
+    "有大雪": -0.07,
+    "有雪珠": -0.05,
+    "有冰珠": -0.05,
+    "有陣雨": -0.01,
+    "陣雨雪": -0.03,
+    "有雹": -0.06,
+    "有雷雨": -0.08,
+    "有雷雪": -0.08,
+    "有雷雹": -0.08,
+    "大雷雨": -0.08,
+    "大雷雹": -0.08,
+    "有雷": -0.01,
+}
+
+#Use for option setting
+class Vehicle:
+    def __init__(self, vehID, slowDownSpeed, slowDownDuration, safeDist,
+                 accel, decel, speedMode, maxSpeed, response):
+        self.vehID = vehID
+        self.slowDown = [slowDownSpeed, slowDownDuration]
+        self.safeDist = safeDist
+        self.accel = accel
+        self.decel = decel
+        self.speedMode = speedMode
+        self.maxSpeed = maxSpeed
+        self.response = response
+
+
+
 def is_xml(data):
     try:
         ET.fromstring(data)
@@ -78,3 +123,7 @@ def adjustDrivingEnv(option):
 		setMinGap(i.vehID, i.safeDist)
 		setTau(i.vehID, i.response)
 
+
+def writeLog(file, log_type):
+    pass
+    return
