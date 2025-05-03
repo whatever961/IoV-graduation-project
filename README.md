@@ -8,10 +8,10 @@ The main function. Split all car entities to multiple PCs via MQTT. Wait for all
 Get its own vehicle data and fetch weather data. Then adjust its attributes by weather logic. Ack back to Simulation.py.
 
 ## 待辦:
-✔️1. 研究天氣變化與駕駛行為關係
-✔️2. 找到公開天氣資料的格式並分解出有用的資料 (當天日照、雨量、能見度等)
-✔️3. 資料分析後用 "adjustDrivingEnv()" 調整道路與駕駛各變數 (駕駛最大時速、加減速度大小、開車是否激進)
-✔️4. 弄好MQTT的連接與傳遞
+1. 研究天氣變化與駕駛行為關係✔️
+2. 找到公開天氣資料的格式並分解出有用的資料 (當天日照、雨量、能見度等)✔️
+3. 資料分析後用 "adjustDrivingEnv()" 調整道路與駕駛各變數 (駕駛最大時速、加減速度大小、開車是否激進)✔️
+4. 弄好MQTT的連接與傳遞✔️
 5. 找出可深入研究的細項: 目前可能選項有
     1. 試錯weather_factor找到最好的heuristic
     2. weather資料會影響通訊效率或增加負擔嗎(measure MQTT packets)
