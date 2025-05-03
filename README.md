@@ -13,9 +13,9 @@ Get its own vehicle data and fetch weather data. Then adjust its attributes by w
 ✔️3. 資料分析後用 "adjustDrivingEnv()" 調整道路與駕駛各變數 (駕駛最大時速、加減速度大小、開車是否激進)
 ✔️4. 弄好MQTT的連接與傳遞
 5. 找出可深入研究的細項: 目前可能選項有
-    一. 試錯weather_factor找到最好的heuristic
-    二. weather資料會影響通訊效率或增加負擔嗎(measure MQTT packets)
-    三. 天氣造成的減速對運輸效率的影響
-    四. 有/無天氣資料下的模擬數據比較
-    五. 車子根據路況自動重新規劃路線的可能
+    1. 試錯weather_factor找到最好的heuristic
+    2. weather資料會影響通訊效率或增加負擔嗎(measure MQTT packets)
+    3. 天氣造成的減速對運輸效率的影響
+    4. 有/無天氣資料下的模擬數據比較
+    5. 車子根據路況自動重新規劃路線的可能
 6. 實作 "writeLog()" 將模擬中必要訊息寫進特定log 如車禍、不可預期的錯誤訊息
