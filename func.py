@@ -123,6 +123,9 @@ def adjustDrivingEnv(option):
 		setMinGap(i.vehID, i.safeDist)
 		setTau(i.vehID, i.response)
 
+def split_vehicles(vehicle_ids, num_obus):
+    return [vehicle_ids[i::num_obus] for i in range(num_obus)]
+
 
 def writeLog(file, log_type):
     pass
