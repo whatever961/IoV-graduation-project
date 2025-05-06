@@ -142,11 +142,11 @@ def OBUProcessData(cloud_data):
     return weighted_weather
 
 
-def setOption(weather_factor): 
+def setOption(weather_factor, veh_ids): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce
     vehicle = None
     option = []
-    for veh_id in traci.vehicle.getIDList():
+    for veh_id in veh_ids:
         """
         Shorter accel, decel, max_speed
         Longer tau, min_gap
@@ -173,23 +173,6 @@ def setOption(weather_factor):
         option.append(vehicle)
 
     return option
-
-
-# Callback when connected to the broker
-def on_connect(client, userdata, flags, rc, properties):
-    print("Connected with result code " + str(rc))
-    client.subscribe("dpgo/#")  # MQTT_sub from OBU(data path go)
-
-# Callback when a message is received
-def on_message(client, userdata, msg):
-    print(f"Message from {msg.topic}: {msg.payload.decode('utf-8')}")
-    
-    # MQTT_pub to OBU
-    # Set option
-    data = json.loads(msg.payload.decode('utf-8'))
-    option = setOption(weather_factor, data)
-    # Publish the message
-    client.publish('dpback', option)
 
 # Initialize the client
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
