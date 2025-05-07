@@ -174,20 +174,6 @@ def setOption(weather_factor, veh_ids):
 
     return option
 
-# Initialize the client
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-client.username_pw_set("rw", "readwrite")
-
-# Assign callbacks
-client.on_connect = on_connect
-client.on_message = on_message
-
-# Connect to the broker
-client.connect("127.0.0.1", 1883, 60)
-
-# Connect to the broker
-client.loop_forever()   # Change later
-
 '''
 if __name__ == "__main__":
     collision_list = []
