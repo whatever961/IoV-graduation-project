@@ -5,10 +5,51 @@ NUM_PCS = 2  # Number of PC to be distributed
 ACK_TIMEOUT = 5  # seconds
 
 acks_received = {}
+vehicle_end_data = {}
+
+
+def write_vehicle_end_data_to_csv(stats_dict, filename="vehicle_log.csv"):
+    with open(filename, "w", newline='') as csvfile:
+        fieldnames = ["veh_id", "start_time", "reach_time", "num_of_stops", "num_of_reroutes"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for veh_id, stats in stats_dict.items():
+            writer.writerow({
+                "veh_id": veh_id,
+                "start_time": stats.get("start_time"),
+                "reach_time": stats.get("reach_time"),
+                "num_of_stops": stats.get("num_of_stops", 0),
+                "num_of_reroutes": stats.get("num_of_reroutes", 0)
+            })
+
 
 def on_ack(client, userdata, msg):
     group_id = msg.topic.split("/")[-1]  # e.g. controller/ack/pc2
     acks_received.add(group_id)
+    try:
+        ack = json.loads(msg.payload.decode())
+    except Exception as e:
+        print(f"Failed to parse message: {e}")
+        return
+    # Extract data from the ACK payload
+    option = ack.get("option", None)
+    congested_edges = ack.get("congested_edges", [])
+    
+    if option is not None :
+        adjustDrivingEnv(option)
+        
+    # Smart rerouting logic
+    if congested_edges:
+        for veh_id in traci.vehicle.getIDList():
+            if should_reroute(veh_id, congested_edges):
+                try:
+                    traci.vehicle.rerouteTraveltime(veh_id)  # reroute to same destination
+                    traci.vehicle.setColor(veh_id, (255, 128, 0, 255))  # mark rerouted cars
+                    vehicle_stats[veh_id]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
+                    print(f"[Smart Reroute] {veh_id}")
+                except Exception as e:
+                    print(f"Reroute failed for {veh_id}: {e}")
 
 def get_vehicle_state(veh_id):
     return {
@@ -36,8 +77,6 @@ client.loop_start()
 
 if __name__ == "__main__":
     is_timeout = false;
-    collision_list = []
-    collision_file = open("collide_log", "ra")
     expected_acks = {f"pc{i}" for i in range(NUM_OBUS)}
 
     #Start simulation
@@ -68,11 +107,29 @@ if __name__ == "__main__":
         acks_received.clear()
         is_timeout = false;
         traci.simulation.step()
-        #If there's a car accident, record ID of cars
-        #if(traci.getCollidingVehiclesNumber()>0):
-            #collision_list.append(traci.getCollidingVehiclesIDList())
+
+        #tracking data after we moved
+        current_time = traci.simulation.getCurrentTime()
+        for veh_id in traci.vehicle.getIDList():
+            # Initialize tracking entry if new
+            if veh_id not in vehicle_end_data:
+                vehicle_end_data[veh_id] = {
+                    "start_time": current_time,
+                    "reach_time": None,
+                    "num_of_stops": 0,
+                    "num_of_reroutes": 0,
+                    "last_speed": -1
+                }
+            speed = traci.vehicle.getSpeed(veh_id)
+            # Count stop events (speed goes from > 0 to 0)
+            if speed < 0.1 and vehicle_end_data[veh_id]["last_speed"] >= 0.1:
+                vehicle_end_data[veh_id]["num_of_stops"] += 1
+
+            vehicle_end_data[veh_id]["last_speed"] = speed
+            
+        arrived_vehicles = traci.simulation.getArrivedIDList()
+        for veh_id in arrived_vehicles:
+            if veh_id in vehicle_end_data:
+                vehicle_end_data[veh_id]["reach_time"] = current_time
     traci.close()
-
-    #Write log file base on whatever the fuck we got(not implement yet)
-
-    collision_file.close()
+    write_vehicle_end_data_to_csv(vehicle_end_data)
