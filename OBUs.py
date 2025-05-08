@@ -62,7 +62,7 @@ def on_message(client, userdata, msg):
     client.publish(ack_topic, json.dumps({"option": option, "weather_factor": weather_factor, "congested_edges": congested_edges}))
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--pc_topic_id', type=int, required=True, help="Topic for distributed OBUs' PC (e.g. pc0, pc1)")
+parser.add_argument('--pc_topic_id', type=int, required=True, help="Topic for distributed OBUs' PC. Insert integer >= 0 (e.g. pc{0}, pc{1})")
 args = parser.parse_args()
 obu_topic = f"controller/send/pc{args.pc_topic_id}"
 
