@@ -115,17 +115,36 @@ bit6: Disregard speed limit.
 # option 改用 class 的 list
 def adjustDrivingEnv(option):
 	for i in option:
-		slowDown(i.vehID, i.slowDownSpeed, i.slowDownDuration)
-		setAccel(i.vehID, i.accel)
-		setDecel(i.vehID, i.decel)
-		setSpeedMode(i.vehID, i.speedMode)
-		setMaxSpeed(i.vehID, i.maxSpeed)
-		setMinGap(i.vehID, i.safeDist)
-		setTau(i.vehID, i.response)
+		traci.vehicle.slowDown(i.vehID, i.slowDownSpeed, i.slowDownDuration)
+		traci.vehicle.setAccel(i.vehID, i.accel)
+		traci.vehicle.setDecel(i.vehID, i.decel)
+		traci.vehicle.setSpeedMode(i.vehID, i.speedMode)
+		traci.vehicle.setMaxSpeed(i.vehID, i.maxSpeed)
+		traci.vehicle.setMinGap(i.vehID, i.safeDist)
+		traci.vehicle.setTau(i.vehID, i.response)
 
 def split_vehicles(vehicle_ids, num_obus):
     return [vehicle_ids[i::num_obus] for i in range(num_obus)]
 
+def should_reroute(veh_id, congested_edges):
+    current_edge = traci.vehicle.getRoadID(veh_id)
+    route = traci.vehicle.getRoute(veh_id)
+
+    if not route:
+        return False
+
+    destination_edge = route[-1]
+
+    # Do not reroute if already on a congested edge or the destination itself is congested
+    if (current_edge in congested_edges) or (destination_edge in congested_edges):
+        return False
+
+    # Check if any intermediate edges are congested
+    for edge in route[:-1]:
+        if edge in congested_edges:
+            return random.random() < 0.45  # Smart rerouting (45%)
+    
+    return False
 
 def writeLog(file, log_type):
     pass
