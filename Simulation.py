@@ -57,6 +57,7 @@ def get_vehicle_state(veh_id):
         "pos": traci.vehicle.getPosition(veh_id),
         "speed": traci.vehicle.getSpeed(veh_id),
         "max_speed": traci.vehicle.getMaxSpeed(veh_id),
+        "allowed_speed": traci.vehicle.getAllowedSpeed(veh_id),
         "angle": traci.vehicle.getAngle(veh_id),
         "road": traci.vehicle.getRoadID(veh_id),
         "accel": traci.vehicle.getAccel(veh_id),
