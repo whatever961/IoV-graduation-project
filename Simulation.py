@@ -34,22 +34,9 @@ def on_ack(client, userdata, msg):
         return
     # Extract data from the ACK payload
     option = ack.get("option", None)
-    congested_edges = ack.get("congested_edges", [])
     
     if option is not None :
-        adjustDrivingEnv(option)
-        
-    # Smart rerouting logic
-    if congested_edges:
-        for veh_id in traci.vehicle.getIDList():
-            if should_reroute(veh_id, congested_edges):
-                try:
-                    traci.vehicle.rerouteTraveltime(veh_id)  # reroute to same destination
-                    traci.vehicle.setColor(veh_id, (255, 128, 0, 255))  # mark rerouted cars
-                    vehicle_stats[veh_id]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
-                    print(f"[Smart Reroute] {veh_id}")
-                except Exception as e:
-                    print(f"Reroute failed for {veh_id}: {e}")
+        adjustDrivingEnv(option, vehicle_end_data)
 
 def get_vehicle_state(veh_id):
     return {
@@ -77,7 +64,7 @@ client.subscribe("controller/ack/#")
 client.loop_start()
 
 if __name__ == "__main__":
-    is_timeout = false;
+    is_timeout = false
     expected_acks = {f"pc{i}" for i in range(NUM_OBUS)}
 
     #Start simulation
@@ -96,17 +83,17 @@ if __name__ == "__main__":
         start_time = time.time()
         while time.time() - start_time < ACK_TIMEOUT:
             if acks_received == expected_acks:
-                is_timeout = false;
+                is_timeout = false
                 break
             time.sleep(0.01)
-            is_timeout = true;
+            is_timeout = true
 
         if is_timeout == true:
             print("WARNING: Some OBUs did not respond in time!")
 
         #Continue simulation
         acks_received.clear()
-        is_timeout = false;
+        is_timeout = false
         traci.simulation.step()
 
         #tracking data after we moved

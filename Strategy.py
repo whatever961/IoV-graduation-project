@@ -142,7 +142,7 @@ def OBUProcessData(cloud_data):
     return weighted_weather
 
 
-def setOption(weather_factor, veh_ids): 
+def setOption(weather_factor, veh_ids, congested_edges): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce
     vehicle = None
     option = []
@@ -169,6 +169,7 @@ def setOption(weather_factor, veh_ids):
             speedMode=speed_mode
             maxSpeed=adj_max_speed
             response=adj_tau
+            reroute=should_reroute(veh_id, congested_edges)
         )
         option.append(vehicle)
 

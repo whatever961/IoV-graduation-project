@@ -56,10 +56,10 @@ def on_message(client, userdata, msg):
     if traci.getCurrentTime()%1200000==0:
         #cloud_data = fetchExternalData("https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=CWA-7B465ABE-F54D-4231-ABB4-D62EEFC1F684&format=JSON&StationId=466930,466910,466920,CAAH60,A0A460,AOA010,G2AI50&WeatherElement=Weather,VisibilityDescription,Now&GeoInfo=CountyName,TownName")
         #weather_factor = OBUProcessData(cloud_data)
-        weather_factor = random.choice([-0.05, -0.07, -0.13, -0.11, -0.09]) #for demo usage, change the weather state randomly
-        option = setOption(weather_factor, veh_ids)
+        weather_factor = 0 # 這我不知道怎麼設定，反正晴天雨天
+        option = setOption(weather_factor, veh_ids, congested_edges)
     ack_topic = f"controller/ack/pc{args.pc_topic_id}"
-    client.publish(ack_topic, json.dumps({"option": option, "weather_factor": weather_factor, "congested_edges": congested_edges}))
+    client.publish(ack_topic, json.dumps({"option": option}))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--pc_topic_id', type=int, required=True, help="Topic for distributed OBUs' PC. Insert integer >= 0 (e.g. pc{0}, pc{1})")

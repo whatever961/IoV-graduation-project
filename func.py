@@ -45,7 +45,7 @@ weather_mapping = {
 #Use for option setting
 class Vehicle:
     def __init__(self, vehID, slowDownSpeed, slowDownDuration, safeDist,
-                 accel, decel, speedMode, maxSpeed, response):
+                 accel, decel, speedMode, maxSpeed, response, reroute):
         self.vehID = vehID
         self.slowDown = [slowDownSpeed, slowDownDuration]
         self.safeDist = safeDist
@@ -54,6 +54,7 @@ class Vehicle:
         self.speedMode = speedMode
         self.maxSpeed = maxSpeed
         self.response = response
+        self.reroute = False
 
 
 
@@ -113,7 +114,7 @@ bit6: Disregard speed limit.
 """
 
 # option 改用 class 的 list
-def adjustDrivingEnv(option):
+def adjustDrivingEnv(option, end_data):
 	for i in option:
 		traci.vehicle.slowDown(i.vehID, i.slowDownSpeed, i.slowDownDuration)
 		traci.vehicle.setAccel(i.vehID, i.accel)
@@ -122,6 +123,14 @@ def adjustDrivingEnv(option):
 		traci.vehicle.setMaxSpeed(i.vehID, i.maxSpeed)
 		traci.vehicle.setMinGap(i.vehID, i.safeDist)
 		traci.vehicle.setTau(i.vehID, i.response)
+        if i.reroute != False:
+            try:
+                    traci.vehicle.rerouteTraveltime(i.vehID)  
+                    traci.vehicle.setColor(i.vehID, (255, 128, 0, 255))  # mark rerouted cars
+                    end_data[i.vehID]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
+                    print(f"[Smart Reroute] {i.vehID}")
+            except Exception as e:
+                    print(f"Reroute failed for {i.vehID}: {e}")
 
 def split_vehicles(vehicle_ids, num_obus):
     return [vehicle_ids[i::num_obus] for i in range(num_obus)]
