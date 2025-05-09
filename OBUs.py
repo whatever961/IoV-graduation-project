@@ -11,12 +11,12 @@ def infer_local_congestion(vehicles):
     for v in vehicles:
         edge = v.get("road")
         speed = v.get("speed")
-        max_speed = v.get("maxSpeed")  # fallback = 50 km/h
+        allowed_speed = v.get("allowed_speed")
 
         if edge not in edge_speeds:
             edge_speeds[edge] = 0
             edge_counts[edge] = 0
-            edge_max_speeds[edge] = max_speed
+            edge_max_speeds[edge] = allowed_speed
 
         edge_speeds[edge] += speed
         edge_counts[edge] += 1
@@ -24,8 +24,8 @@ def infer_local_congestion(vehicles):
     congested_edges = []
     for edge, count in edge_counts.items():
         avg_speed = edge_speeds[edge] / count
-        max_speed = edge_max_speeds[edge]
-        threshold = max_speed * 0.7
+        allowed_speed = edge_max_speeds[edge]
+        threshold = allowed_speed * 0.7
 
         if avg_speed < threshold and count >= 4:
             congested_edges.append(edge)
