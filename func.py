@@ -5,9 +5,6 @@ import csv
 import json
 import xml.etree.ElementTree as ET
 import pandas as pd
-import sqlite3
-import psycopg2
-import mysql.connector
 from io import StringIO
 import paho.mqtt.client as mqtt
 import time
@@ -154,7 +151,3 @@ def should_reroute(veh_id, congested_edges):
             return random.random() < 0.45  # Smart rerouting (45%)
     
     return False
-
-def writeLog(file, log_type):
-    pass
-    return
