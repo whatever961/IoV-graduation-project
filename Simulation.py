@@ -13,7 +13,7 @@ import func
 NUM_PCS = 2  # Number of PC to be distributed
 ACK_TIMEOUT = 2  # seconds
 
-acks_received = {}
+acks_received = set()
 vehicle_end_data = {}
 
 
@@ -59,8 +59,11 @@ def get_vehicle_state(veh_id):
         "accel": traci.vehicle.getAccel(veh_id),
         "decel": traci.vehicle.getDecel(veh_id),
         "speed_mode": traci.vehicle.getSpeedMode(veh_id),
-        "tau": traci.vehicle.getTau(traci.vehicle.getTypeID(veh_id)),
-        "min_gap": traci.vehicle.getMinGap(traci.vehicle.getTypeID(veh_id)),
+        "tau": traci.vehicle.getTau(veh_id),
+        "min_gap": traci.vehicle.getMinGap(veh_id),
+        "current_time": traci.simulation.getTime(),
+        "current_road": traci.vehicle.getRoadID(veh_id),
+        "route": traci.vehicle.getRoute(veh_id)
     }
 
 # Initialize the client
@@ -78,10 +81,10 @@ if __name__ == "__main__":
 
     #Start simulation
     traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
-    #Split and distribute simulation data
-    vehicle_ids = traci.vehicle.getIDList()
-    vehicle_groups = func.split_vehicles(vehicle_ids, NUM_PCS)
     while traci.simulation.getMinExpectedNumber()>0:
+        #Split and distribute simulation data
+        vehicle_ids = traci.vehicle.getIDList()
+        vehicle_groups = func.split_vehicles(vehicle_ids, NUM_PCS)
         # Send vehicle states to each OBU
         for i, group in enumerate(vehicle_groups):
             group_data = [get_vehicle_state(vid) for vid in group]

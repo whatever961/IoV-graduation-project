@@ -8,6 +8,7 @@ import pandas as pd
 from io import StringIO
 import paho.mqtt.client as mqtt
 import time
+import random
 
 # Define cloud weight mapping
 cloud_mapping = {
@@ -52,8 +53,16 @@ class Vehicle:
         self.maxSpeed = maxSpeed
         self.response = response
         self.reroute = False
+    def __jsonencode__(self):
+        return {'vehID': self.vehID, 'slowDown': self.slowDown, 'safeDist': self.safeDist, 'accel': self.accel, 'decel': self.decel, 'speedMode': self.speedMode, 'maxSpeed': self.maxSpeed, 'response': self.response, 'reroute': self.reroute}
 
-
+class AdvancedJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, '__jsonencode__'):
+            return obj.__jsonencode__()
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
 
 def is_xml(data):
     try:
@@ -113,29 +122,26 @@ bit6: Disregard speed limit.
 # option 改用 class 的 list
 def adjustDrivingEnv(option, end_data):
     for i in option:
-        traci.vehicle.slowDown(i.vehID, i.slowDownSpeed, i.slowDownDuration)
-        traci.vehicle.setAccel(i.vehID, i.accel)
-        traci.vehicle.setDecel(i.vehID, i.decel)
-        traci.vehicle.setSpeedMode(i.vehID, i.speedMode)
-        traci.vehicle.setMaxSpeed(i.vehID, i.maxSpeed)
-        traci.vehicle.setMinGap(i.vehID, i.safeDist)
-        traci.vehicle.setTau(i.vehID, i.response)
-        if i.reroute != False:
+        traci.vehicle.slowDown(i.get("vehID"), i.get("slowDown")[0], i.get("slowDown")[1])
+        traci.vehicle.setAccel(i.get("vehID"), i.get("accel"))
+        traci.vehicle.setDecel(i.get("vehID"), i.get("decel"))
+        traci.vehicle.setSpeedMode(i.get("vehID"), i.get("speedMode"))
+        traci.vehicle.setMaxSpeed(i.get("vehID"), i.get("maxSpeed"))
+        traci.vehicle.setMinGap(i.get("vehID"), i.get("safeDist"))
+        traci.vehicle.setTau(i.get("vehID"), i.get("response"))
+        if i.get("reroute") != False:
             try:
-                traci.vehicle.rerouteTraveltime(i.vehID)  
-                traci.vehicle.setColor(i.vehID, (255, 128, 0, 255))  # mark rerouted cars
-                end_data[i.vehID]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
-                print(f"[Smart Reroute] {i.vehID}")
+                traci.vehicle.rerouteTraveltime(i.get("vehID"))  
+                traci.vehicle.setColor(i.get("vehID"), (255, 128, 0, 255))  # mark rerouted cars
+                end_data[i.get("vehID")]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
+                print(f"[Smart Reroute] {i.get("vehID")}")
             except Exception as e:
-                print(f"Reroute failed for {i.vehID}: {e}")
+                print(f"Reroute failed for {i.get("vehID")}: {e}")
 
 def split_vehicles(vehicle_ids, num_obus):
     return [vehicle_ids[i::num_obus] for i in range(num_obus)]
 
-def should_reroute(veh_id, congested_edges):
-    current_edge = traci.vehicle.getRoadID(veh_id)
-    route = traci.vehicle.getRoute(veh_id)
-
+def should_reroute(current_edge, route, congested_edges):
     if not route:
         return False
 

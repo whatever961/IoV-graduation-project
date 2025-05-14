@@ -1,4 +1,3 @@
-import traci
 import requests
 import os
 import csv
@@ -151,25 +150,25 @@ def OBUProcessData(cloud_data):
     return weighted_weather
 
 
-def setOption(weather_factor, veh_ids, congested_edges): 
+def setOption(weather_factor, vehicles, congested_edges): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce
     vehicle = None
     option = []
-    for veh_id in veh_ids:
+    for veh in vehicles:
         """
         Shorter accel, decel, max_speed
         Longer tau, min_gap
         """
-        adj_accel = (1 + weather_factor) * traci.vehicle.getAccel(veh_id)
-        adj_decel = (1 + weather_factor) * traci.vehicle.getDecel(veh_id)
-        adj_max_speed = (1 + weather_factor) * traci.vehicle.getMaxSpeed(veh_id)
-        adj_speed = (1 + weather_factor) * traci.vehicle.getSpeed(veh_id)
-        speed_mode = traci.vehicle.getSpeedMode(veh_id)
-        adj_tau = (1 - weather_factor) * traci.vehicle.getTau(traci.vehicle.getTypeID(veh_id))
-        adj_min_gap = (1 - weather_factor) * traci.vehicle.getMinGap(traci.vehicle.getTypeID(veh_id))
+        adj_accel = (1 + weather_factor) * veh.get("accel")
+        adj_decel = (1 + weather_factor) * veh.get("decel")
+        adj_max_speed = (1 + weather_factor) * veh.get("max_speed")
+        adj_speed = (1 + weather_factor) * veh.get("speed")
+        speed_mode = veh.get("speed_mode")
+        adj_tau = (1 - weather_factor) * veh.get("tau")
+        adj_min_gap = (1 - weather_factor) * veh.get("min_gap")
         
         vehicle = func.Vehicle(
-            vehID=veh_id,
+            vehID=veh.get("id"),
             slowDownSpeed=adj_speed,
             slowDownDuration=3,
             safeDist=adj_min_gap,
@@ -178,7 +177,7 @@ def setOption(weather_factor, veh_ids, congested_edges):
             speedMode=speed_mode,
             maxSpeed=adj_max_speed,
             response=adj_tau,
-            reroute=func.should_reroute(veh_id, congested_edges)
+            reroute=func.should_reroute(veh.get("current_road"), veh.get("route"), congested_edges)
         )
         option.append(vehicle)
 
