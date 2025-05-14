@@ -1,9 +1,18 @@
-import func
+import traci
+import requests
+import os
+import csv
+import json
+import xml.etree.ElementTree as ET
+import pandas as pd
+from io import StringIO
+import paho.mqtt.client as mqtt
+import time
+
 
 """
 Used for connecting database,
 now only support mysql and postgresql
-"""
 def connectDB(db_type = "mysql", db_name, user, password, host, port):
     match db_type:
         case "mysql":
@@ -44,7 +53,7 @@ def connectDB(db_type = "mysql", db_name, user, password, host, port):
         case _:
             print("Database not support")
     return
-
+"""
 
 
 """
@@ -161,14 +170,14 @@ def setOption(weather_factor, veh_ids, congested_edges):
         
         vehicle = Vehicle(
             vehID=veh_id,
-            slowDownSpeed=adj_speed
-            slowDownDuration=3
-            safeDist=adj_min_gap
-            accel=adj_accel
-            decel=adj_decel
-            speedMode=speed_mode
-            maxSpeed=adj_max_speed
-            response=adj_tau
+            slowDownSpeed=adj_speed,
+            slowDownDuration=3,
+            safeDist=adj_min_gap,
+            accel=adj_accel,
+            decel=adj_decel,
+            speedMode=speed_mode,
+            maxSpeed=adj_max_speed,
+            response=adj_tau,
             reroute=should_reroute(veh_id, congested_edges)
         )
         option.append(vehicle)
