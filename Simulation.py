@@ -1,4 +1,12 @@
-import func
+import traci
+import requests
+import os
+import csv
+import json
+import xml.etree.ElementTree as ET
+import pandas as pd
+from io import StringIO
+import paho.mqtt.client as mqtt
 import time
 
 NUM_PCS = 2  # Number of PC to be distributed
@@ -36,7 +44,7 @@ def on_ack(client, userdata, msg):
     option = ack.get("option", None)
     
     if option is not None :
-        adjustDrivingEnv(option, vehicle_end_data)
+        func.adjustDrivingEnv(option, vehicle_end_data)
 
 def get_vehicle_state(veh_id):
     return {
@@ -71,7 +79,7 @@ if __name__ == "__main__":
     traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
     #Split and distribute simulation data
     vehicle_ids = traci.vehicle.getIDList()
-    vehicle_groups = split_vehicles(vehicle_ids, NUM_PCS)
+    vehicle_groups = func.split_vehicles(vehicle_ids, NUM_PCS)
     while traci.simulation.getMinExpectedNumber()>0:
         # Send vehicle states to each OBU
         for i, group in enumerate(vehicle_groups):
