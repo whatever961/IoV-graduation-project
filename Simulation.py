@@ -8,9 +8,10 @@ import pandas as pd
 from io import StringIO
 import paho.mqtt.client as mqtt
 import time
+import func
 
 NUM_PCS = 2  # Number of PC to be distributed
-ACK_TIMEOUT = 5  # seconds
+ACK_TIMEOUT = 2  # seconds
 
 acks_received = {}
 vehicle_end_data = {}
@@ -72,8 +73,8 @@ client.subscribe("controller/ack/#")
 client.loop_start()
 
 if __name__ == "__main__":
-    is_timeout = false
-    expected_acks = {f"pc{i}" for i in range(NUM_OBUS)}
+    is_timeout = False
+    expected_acks = {f"pc{i}" for i in range(NUM_PCS)}
 
     #Start simulation
     traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
@@ -91,21 +92,21 @@ if __name__ == "__main__":
         start_time = time.time()
         while time.time() - start_time < ACK_TIMEOUT:
             if acks_received == expected_acks:
-                is_timeout = false
+                is_timeout = False
                 break
             time.sleep(0.01)
-            is_timeout = true
+            is_timeout = True
 
-        if is_timeout == true:
+        if is_timeout == True:
             print("WARNING: Some OBUs did not respond in time!")
 
         #Continue simulation
         acks_received.clear()
-        is_timeout = false
+        is_timeout = False
         traci.simulation.step()
 
         #tracking data after we moved
-        current_time = traci.simulation.getCurrentTime()
+        current_time = traci.simulation.getTime()
         for veh_id in traci.vehicle.getIDList():
             # Initialize tracking entry if new
             if veh_id not in vehicle_end_data:

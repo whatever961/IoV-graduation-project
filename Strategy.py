@@ -6,8 +6,8 @@ import json
 import xml.etree.ElementTree as ET
 import pandas as pd
 from io import StringIO
-import paho.mqtt.client as mqtt
 import time
+import func
 
 
 """
@@ -89,14 +89,14 @@ def parseWeather(weather_str):
     weather_weight = 1.0  #Default
     
     # Determine cloud weight
-    for cloud in cloud_mapping.keys():
+    for cloud in func.cloud_mapping.keys():
         if weather_str.startswith(cloud):
             cloud_weight = cloud_mapping[cloud]
             weather_str = weather_str[len(cloud):]  #Remove cloud part
             break #Take first matched condition
     
     # Determine weather weight
-    for condition in weather_mapping.keys():
+    for condition in func.weather_mapping.keys():
         if condition in weather_str:
             weather_weight = weather_mapping[condition]
             break #Take first matched condition
@@ -113,7 +113,7 @@ def averageWeightedWeather(weather_list):
         count += 1
     
     #Avoid division by zero
-    return total_weighted_weather / count if count>0 else 1
+    return weighted_weather / count if count>0 else 1
 
 def OBUProcessData(cloud_data):
     if cloud_data is None or "records" not in cloud_data or "Station" not in cloud_data["records"]:
@@ -168,7 +168,7 @@ def setOption(weather_factor, veh_ids, congested_edges):
         adj_tau = (1 - weather_factor) * traci.vehicle.getTau(traci.vehicle.getTypeID(veh_id))
         adj_min_gap = (1 - weather_factor) * traci.vehicle.getMinGap(traci.vehicle.getTypeID(veh_id))
         
-        vehicle = Vehicle(
+        vehicle = func.Vehicle(
             vehID=veh_id,
             slowDownSpeed=adj_speed,
             slowDownDuration=3,
@@ -178,7 +178,7 @@ def setOption(weather_factor, veh_ids, congested_edges):
             speedMode=speed_mode,
             maxSpeed=adj_max_speed,
             response=adj_tau,
-            reroute=should_reroute(veh_id, congested_edges)
+            reroute=func.should_reroute(veh_id, congested_edges)
         )
         option.append(vehicle)
 

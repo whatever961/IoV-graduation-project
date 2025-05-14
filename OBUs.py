@@ -63,7 +63,7 @@ def on_message(client, userdata, msg):
     congested_edges = infer_local_congestion(assigned_vehicles)
     option = None
     weather_factor = None
-    if traci.getCurrentTime()%1200000==0:
+    if traci.simulation.getTime()%1200.0==0.0:
         #cloud_data = fetchExternalData("https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=CWA-7B465ABE-F54D-4231-ABB4-D62EEFC1F684&format=JSON&StationId=466930,466910,466920,CAAH60,A0A460,AOA010,G2AI50&WeatherElement=Weather,VisibilityDescription,Now&GeoInfo=CountyName,TownName")
         #weather_factor = OBUProcessData(cloud_data)
         weather_factor = 0 # 這我不知道怎麼設定，反正晴天雨天
