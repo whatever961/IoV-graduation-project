@@ -87,15 +87,15 @@ Use to adjust the sumo driving environment through traci.
 option format: It's a class
 
 class Vehicle:
-	def __init__(self, vehID, slowDownSpeed, slowDownDuration, safeDist, accel, decel, speedMode, maxSpeed, response):
-		self.vehID = vehID									: 車輛ID(string)
-		self.slowDown = [slowDownSpeed, slowDownDuration]	: [減速到達的速度, 減速所需時間](double, double)
-		self.safeDist = safeDist							: 重設安全距離(double)
-		self.accel = accel									: 加速度(double)
-		self.decel = decel									: 減速度(double)
-		self.speedMode = speedMode							: 行車模式(integer)[]
-		self.maxSpeed = maxSpeed							: 最大速度(double)
-		self.response = response							: 反應時間(double)
+    def __init__(self, vehID, slowDownSpeed, slowDownDuration, safeDist, accel, decel, speedMode, maxSpeed, response):
+        self.vehID = vehID									: 車輛ID(string)
+        self.slowDown = [slowDownSpeed, slowDownDuration]	: [減速到達的速度, 減速所需時間](double, double)
+        self.safeDist = safeDist							: 重設安全距離(double)
+        self.accel = accel									: 加速度(double)
+        self.decel = decel									: 減速度(double)
+        self.speedMode = speedMode							: 行車模式(integer)[]
+        self.maxSpeed = maxSpeed							: 最大速度(double)
+        self.response = response							: 反應時間(double)
 """
 
 """
@@ -112,22 +112,22 @@ bit6: Disregard speed limit.
 
 # option 改用 class 的 list
 def adjustDrivingEnv(option, end_data):
-	for i in option:
-		traci.vehicle.slowDown(i.vehID, i.slowDownSpeed, i.slowDownDuration)
-		traci.vehicle.setAccel(i.vehID, i.accel)
-		traci.vehicle.setDecel(i.vehID, i.decel)
-		traci.vehicle.setSpeedMode(i.vehID, i.speedMode)
-		traci.vehicle.setMaxSpeed(i.vehID, i.maxSpeed)
-		traci.vehicle.setMinGap(i.vehID, i.safeDist)
-		traci.vehicle.setTau(i.vehID, i.response)
+    for i in option:
+        traci.vehicle.slowDown(i.vehID, i.slowDownSpeed, i.slowDownDuration)
+        traci.vehicle.setAccel(i.vehID, i.accel)
+        traci.vehicle.setDecel(i.vehID, i.decel)
+        traci.vehicle.setSpeedMode(i.vehID, i.speedMode)
+        traci.vehicle.setMaxSpeed(i.vehID, i.maxSpeed)
+        traci.vehicle.setMinGap(i.vehID, i.safeDist)
+        traci.vehicle.setTau(i.vehID, i.response)
         if i.reroute != False:
             try:
-                    traci.vehicle.rerouteTraveltime(i.vehID)  
-                    traci.vehicle.setColor(i.vehID, (255, 128, 0, 255))  # mark rerouted cars
-                    end_data[i.vehID]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
-                    print(f"[Smart Reroute] {i.vehID}")
+                traci.vehicle.rerouteTraveltime(i.vehID)  
+                traci.vehicle.setColor(i.vehID, (255, 128, 0, 255))  # mark rerouted cars
+                end_data[i.vehID]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
+                print(f"[Smart Reroute] {i.vehID}")
             except Exception as e:
-                    print(f"Reroute failed for {i.vehID}: {e}")
+                print(f"Reroute failed for {i.vehID}: {e}")
 
 def split_vehicles(vehicle_ids, num_obus):
     return [vehicle_ids[i::num_obus] for i in range(num_obus)]
