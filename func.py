@@ -42,10 +42,8 @@ weather_mapping = {
 
 #Use for option setting
 class Vehicle:
-    def __init__(self, vehID, slowDownSpeed, slowDownDuration, safeDist,
-                 accel, decel, speedMode, maxSpeed, response, reroute):
+    def __init__(self, vehID, safeDist, accel, decel, speedMode, maxSpeed, response, reroute):
         self.vehID = vehID
-        self.slowDown = [slowDownSpeed, slowDownDuration]
         self.safeDist = safeDist
         self.accel = accel
         self.decel = decel
@@ -54,7 +52,7 @@ class Vehicle:
         self.response = response
         self.reroute = False
     def __jsonencode__(self):
-        return {'vehID': self.vehID, 'slowDown': self.slowDown, 'safeDist': self.safeDist, 'accel': self.accel, 'decel': self.decel, 'speedMode': self.speedMode, 'maxSpeed': self.maxSpeed, 'response': self.response, 'reroute': self.reroute}
+        return {'vehID': self.vehID, 'safeDist': self.safeDist, 'accel': self.accel, 'decel': self.decel, 'speedMode': self.speedMode, 'maxSpeed': self.maxSpeed, 'response': self.response, 'reroute': self.reroute}
 
 class AdvancedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -122,7 +120,6 @@ bit6: Disregard speed limit.
 # option 改用 class 的 list
 def adjustDrivingEnv(option, end_data):
     for i in option:
-        traci.vehicle.slowDown(i.get("vehID"), i.get("slowDown")[0], i.get("slowDown")[1])
         traci.vehicle.setAccel(i.get("vehID"), i.get("accel"))
         traci.vehicle.setDecel(i.get("vehID"), i.get("decel"))
         traci.vehicle.setSpeedMode(i.get("vehID"), i.get("speedMode"))

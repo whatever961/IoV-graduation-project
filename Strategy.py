@@ -169,8 +169,6 @@ def setOption(weather_factor, vehicles, congested_edges):
         
         vehicle = func.Vehicle(
             vehID=veh.get("id"),
-            slowDownSpeed=adj_speed,
-            slowDownDuration=3,
             safeDist=adj_min_gap,
             accel=adj_accel,
             decel=adj_decel,

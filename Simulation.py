@@ -10,7 +10,7 @@ import paho.mqtt.client as mqtt
 import time
 import func
 
-NUM_PCS = 2  # Number of PC to be distributed
+NUM_PCS = 30  # Number of PC to be distributed
 ACK_TIMEOUT = 2  # seconds
 
 acks_received = set()
