@@ -37,7 +37,7 @@ def infer_local_congestion(vehicles):
         allowed_speed = edge_max_speeds[edge]
         threshold = allowed_speed * 0.7
 
-        if avg_speed < threshold and count >= 4:
+        if avg_speed < threshold and count > 2:
             congested_edges.append(edge)
 
     return congested_edges

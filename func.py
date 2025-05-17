@@ -50,7 +50,7 @@ class Vehicle:
         self.speedMode = speedMode
         self.maxSpeed = maxSpeed
         self.response = response
-        self.reroute = False
+        self.reroute = reroute
     def __jsonencode__(self):
         return {'vehID': self.vehID, 'safeDist': self.safeDist, 'accel': self.accel, 'decel': self.decel, 'speedMode': self.speedMode, 'maxSpeed': self.maxSpeed, 'response': self.response, 'reroute': self.reroute}
 

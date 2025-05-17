@@ -45,7 +45,7 @@ def on_ack(client, userdata, msg):
     option = ack.get("option", None)
     
     if option is not None :
-        func.adjustDrivingEnv(option, vehicle_end_data)
+        func.adjustDrivingEnv(option, userdata)
 
 def get_vehicle_state(veh_id):
     return {
@@ -69,6 +69,7 @@ def get_vehicle_state(veh_id):
 # Initialize the client
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.username_pw_set("rw", "readwrite")
+client.user_data_set(vehicle_end_data)
 client.on_message = on_ack
 # Connect to the server(local)
 client.connect("127.0.0.1", 1883, 60)
