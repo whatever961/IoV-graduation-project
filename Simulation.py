@@ -16,6 +16,23 @@ ACK_TIMEOUT = 2  # seconds
 acks_received = set()
 vehicle_end_data = {}
 
+def lanes_to_edges(lanes):
+    return list({traci.lane.getEdgeID(lane_id) for lane_id in lanes})
+
+def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=2):
+    congested_lanes = []
+    for lane_id in traci.lane.getIDList():
+        if lane_id.startswith(":"):
+            continue  # skip internal edges
+        speed = traci.lane.getLastStepMeanSpeed(lane_id)
+        max_speed = traci.lane.getMaxSpeed(lane_id)
+        count = traci.lane.getLastStepVehicleNumber(lane_id)
+
+        if count >= min_vehicle_count and speed < max_speed * threshold_ratio:
+            congested_lanes.append(lane_id)
+            print(f"[CONGESTED] {lane_id}: {speed:.2f}/{max_speed:.2f} ({count} vehicles)")
+
+    return lanes_to_edges(congested_lanes)
 
 def write_vehicle_end_data_to_csv(stats_dict, filename="vehicle_log.csv"):
     with open(filename, "w", newline='') as csvfile:
@@ -87,8 +104,13 @@ if __name__ == "__main__":
         vehicle_ids = traci.vehicle.getIDList()
         vehicle_groups = func.split_vehicles(vehicle_ids, NUM_PCS)
         # Send vehicle states to each OBU
+        current_time = traci.simulation.getTime()
+        if current_time % 3.0==0.0:
+            congested_edge = detect_congested_edges()
+
         for i, group in enumerate(vehicle_groups):
             group_data = [get_vehicle_state(vid) for vid in group]
+            group_data["congested_edge"] = congested_edge # append the congested edge to group data
             topic = f"controller/send/pc{i}"
             client.publish(topic, json.dumps(group_data))
             
