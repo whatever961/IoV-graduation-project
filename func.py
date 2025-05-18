@@ -131,9 +131,9 @@ def adjustDrivingEnv(option, end_data):
                 traci.vehicle.rerouteTraveltime(i.get("vehID"))  
                 traci.vehicle.setColor(i.get("vehID"), (255, 128, 0, 255))  # mark rerouted cars
                 end_data[i.get("vehID")]["num_of_reroutes"] += 1 # increment the num_of_reroutes data
-                print(f"[Smart Reroute] {i.get("vehID")}")
+                print(f"[Smart Reroute] {i.get('vehID')}")
             except Exception as e:
-                print(f"Reroute failed for {i.get("vehID")}: {e}")
+                print(f"Reroute failed for {i.get('vehID')}: {e}")
 
 def split_vehicles(vehicle_ids, num_obus):
     return [vehicle_ids[i::num_obus] for i in range(num_obus)]
