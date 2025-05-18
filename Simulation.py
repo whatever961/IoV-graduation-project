@@ -15,6 +15,7 @@ ACK_TIMEOUT = 2  # seconds
 
 acks_received = set()
 vehicle_end_data = {}
+congested_edge = None
 
 def lanes_to_edges(lanes):
     return list({traci.lane.getEdgeID(lane_id) for lane_id in lanes})
@@ -64,7 +65,7 @@ def on_ack(client, userdata, msg):
     if option is not None :
         func.adjustDrivingEnv(option, userdata)
 
-def get_vehicle_state(veh_id):
+def get_vehicle_state(veh_id, congested_edge):
     return {
         "id": veh_id,
         "pos": traci.vehicle.getPosition(veh_id),
@@ -80,7 +81,8 @@ def get_vehicle_state(veh_id):
         "min_gap": traci.vehicle.getMinGap(veh_id),
         "current_time": traci.simulation.getTime(),
         "current_road": traci.vehicle.getRoadID(veh_id),
-        "route": traci.vehicle.getRoute(veh_id)
+        "route": traci.vehicle.getRoute(veh_id),
+        "congested_edge": congested_edge
     }
 
 # Initialize the client
@@ -109,8 +111,7 @@ if __name__ == "__main__":
             congested_edge = detect_congested_edges()
 
         for i, group in enumerate(vehicle_groups):
-            group_data = [get_vehicle_state(vid) for vid in group]
-            group_data["congested_edge"] = congested_edge # append the congested edge to group data
+            group_data = [get_vehicle_state(vid, congested_edge) for vid in group]
             topic = f"controller/send/pc{i}"
             client.publish(topic, json.dumps(group_data))
             
