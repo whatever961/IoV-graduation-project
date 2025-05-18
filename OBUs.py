@@ -67,7 +67,7 @@ def on_message(client, userdata, msg):
         #weather_factor = OBUProcessData(cloud_data)
         weather_factor = 0 # 晴天(0) 雨天(-0.15)
         option = Strategy.setOption(weather_factor, assigned_vehicles, congested_edges)
-    else if current_time%3.0==0.0:
+    elif current_time%3.0==0.0:
         weather_factor = 0 # for reroute
         option = Strategy.setOption(weather_factor, assigned_vehicles, congested_edges)
         
