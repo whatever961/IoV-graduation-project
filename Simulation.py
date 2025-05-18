@@ -10,7 +10,7 @@ import paho.mqtt.client as mqtt
 import time
 import func
 
-NUM_PCS = 30  # Number of PC to be distributed
+NUM_PCS = 16  # Number of PC to be distributed
 ACK_TIMEOUT = 2  # seconds
 
 acks_received = set()
@@ -20,7 +20,7 @@ congested_edge = None
 def lanes_to_edges(lanes):
     return list({traci.lane.getEdgeID(lane_id) for lane_id in lanes})
 
-def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=2):
+def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=4):
     congested_lanes = []
     for lane_id in traci.lane.getIDList():
         if lane_id.startswith(":"):
@@ -97,7 +97,7 @@ client.loop_start()
 
 if __name__ == "__main__":
     is_timeout = False
-    expected_acks = {f"pc{i}" for i in range(NUM_PCS)}
+    active_acks = set()
 
     #Start simulation
     traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
@@ -111,14 +111,19 @@ if __name__ == "__main__":
             congested_edge = detect_congested_edges()
 
         for i, group in enumerate(vehicle_groups):
+            if not group:
+                continue
             group_data = [get_vehicle_state(vid, congested_edge) for vid in group]
+            if not group_data:
+                continue
             topic = f"controller/send/pc{i}"
             client.publish(topic, json.dumps(group_data))
+            active_acks.add(f"pc{i}")
             
         # Wait for ACKs from all vehicles or timeout
         start_time = time.time()
         while time.time() - start_time < ACK_TIMEOUT:
-            if acks_received == expected_acks:
+            if acks_received == active_acks:
                 is_timeout = False
                 break
             time.sleep(0.01)
@@ -129,6 +134,7 @@ if __name__ == "__main__":
 
         #Continue simulation
         acks_received.clear()
+        active_acks.clear()
         is_timeout = False
         traci.simulation.step()
 
