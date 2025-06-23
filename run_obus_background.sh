@@ -16,7 +16,7 @@ rm -f logs/obu_*.log
 mkdir -p logs
 
 # 3. launch OBUs in background
-for i in $(seq 0 $OBU_COUNT); do
+for i in $(seq 0 $(($OBU_COUNT - 1))); do
 	echo "launching OBU $i..."
 	nohup python3 OBUs.py --pc_topic_id $i > logs/obu_$i.log 2>&1 &
 done
