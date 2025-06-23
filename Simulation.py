@@ -37,13 +37,14 @@ def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=4):
 
 def write_vehicle_end_data_to_csv(stats_dict, filename="vehicle_log.csv"):
     with open(filename, "w", newline='') as csvfile:
-        fieldnames = ["veh_id", "start_time", "reach_time", "num_of_stops", "num_of_reroutes"]
+        fieldnames = ["veh_id", "vtype", "start_time", "reach_time", "num_of_stops", "num_of_reroutes"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for veh_id, stats in stats_dict.items():
             writer.writerow({
                 "veh_id": veh_id,
+                "vtype": stats.get("vtype"),
                 "start_time": stats.get("start_time"),
                 "reach_time": stats.get("reach_time"),
                 "num_of_stops": stats.get("num_of_stops", 0),
@@ -68,6 +69,7 @@ def on_ack(client, userdata, msg):
 def get_vehicle_state(veh_id, congested_edge):
     return {
         "id": veh_id,
+        "vtype": traci.vehicle.getTypeID(veh_id),
         "pos": traci.vehicle.getPosition(veh_id),
         "speed": traci.vehicle.getSpeed(veh_id),
         "max_speed": traci.vehicle.getMaxSpeed(veh_id),
@@ -98,6 +100,8 @@ client.loop_start()
 if __name__ == "__main__":
     is_timeout = False
     active_acks = set()
+    NUM_PCS = input("Enter the number of PCs (uint): ")
+    reroute_period = input("Enter the time of reroute period (double): ")
 
     #Start simulation
     traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
@@ -107,7 +111,7 @@ if __name__ == "__main__":
         vehicle_groups = func.split_vehicles(vehicle_ids, NUM_PCS)
         # Send vehicle states to each OBU
         current_time = traci.simulation.getTime()
-        if current_time % 3.0==0.0:
+        if current_time % reroute_period==0.0:
             congested_edge = detect_congested_edges()
 
         for i, group in enumerate(vehicle_groups):
@@ -161,5 +165,6 @@ if __name__ == "__main__":
         for veh_id in arrived_vehicles:
             if veh_id in vehicle_end_data:
                 vehicle_end_data[veh_id]["reach_time"] = current_time
+                vehicle_end_data[veh_id]["vtype"] = traci.vehicle.getTypeID(veh_id)
     traci.close()
     write_vehicle_end_data_to_csv(vehicle_end_data)
