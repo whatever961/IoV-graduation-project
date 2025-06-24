@@ -17,21 +17,33 @@ acks_received = set()
 vehicle_end_data = {}
 congested_edge = None
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pcs", type=int, default=16, help="Number of OBUs (PCs, datatype=int)")
+    parser.add_argument("--reroute_period", type=float, default=10.0, help="Time interval between reroutes (seconds, datatype=float)")
+    parser.add_argument("--nogui", action="store_true", help="Run SUMO without GUI")
+    return parser.parse_args()
+
 def lanes_to_edges(lanes):
     return list({traci.lane.getEdgeID(lane_id) for lane_id in lanes})
 
-def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=4):
+def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=4, min_occupancy=0.25):
     congested_lanes = []
     for lane_id in traci.lane.getIDList():
         if lane_id.startswith(":"):
-            continue  # skip internal edges
+            continue
         speed = traci.lane.getLastStepMeanSpeed(lane_id)
         max_speed = traci.lane.getMaxSpeed(lane_id)
         count = traci.lane.getLastStepVehicleNumber(lane_id)
+        occupancy = traci.lane.getLastStepOccupancy(lane_id)
+        length = traci.lane.getLength(lane_id)
 
-        if count >= min_vehicle_count and speed < max_speed * threshold_ratio:
+        if (count >= min_vehicle_count and
+            speed < max_speed * threshold_ratio and
+            occupancy > min_occupancy and
+            (count / length) > 0.2):
             congested_lanes.append(lane_id)
-            print(f"[CONGESTED] {lane_id}: {speed:.2f}/{max_speed:.2f} ({count} vehicles)")
+            print(f"[CONGESTED] {lane_id}: speed={speed:.2f}, occ={occupancy:.2f}, dens={count/length:.2f}")
 
     return lanes_to_edges(congested_lanes)
 
@@ -58,11 +70,10 @@ def on_ack(client, userdata, msg):
     try:
         ack = json.loads(msg.payload.decode())
     except Exception as e:
-        print(f"Failed to parse message: {e}")
+        print(f"Failed to parse ACK message: {e}")
         return
     # Extract data from the ACK payload
     option = ack.get("option", None)
-    
     if option is not None :
         func.adjustDrivingEnv(option, userdata)
 
@@ -100,11 +111,13 @@ client.loop_start()
 if __name__ == "__main__":
     is_timeout = False
     active_acks = set()
-    NUM_PCS = input("Enter the number of PCs (uint): ")
-    reroute_period = input("Enter the time of reroute period (double): ")
+    args = parse_args()
+    NUM_PCS = args.pcs
+    reroute_period = args.reroute_period
 
     #Start simulation
-    traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
+    sumo_binary = "sumo" if args.nogui else "sumo-gui"
+    traci.start([sumo_binary, "-c", "map.sumo.cfg"])
     while traci.simulation.getMinExpectedNumber()>0:
         #Split and distribute simulation data
         vehicle_ids = traci.vehicle.getIDList()
@@ -118,8 +131,6 @@ if __name__ == "__main__":
             if not group:
                 continue
             group_data = [get_vehicle_state(vid, congested_edge) for vid in group]
-            if not group_data:
-                continue
             topic = f"controller/send/pc{i}"
             client.publish(topic, json.dumps(group_data))
             active_acks.add(f"pc{i}")
@@ -158,13 +169,14 @@ if __name__ == "__main__":
             # Count stop events (speed goes from > 0 to 0)
             if speed < 0.1 and vehicle_end_data[veh_id]["last_speed"] >= 0.1:
                 vehicle_end_data[veh_id]["num_of_stops"] += 1
-
             vehicle_end_data[veh_id]["last_speed"] = speed
             
-        arrived_vehicles = traci.simulation.getArrivedIDList()
-        for veh_id in arrived_vehicles:
+        for veh_id in traci.simulation.getArrivedIDList():
             if veh_id in vehicle_end_data:
                 vehicle_end_data[veh_id]["reach_time"] = current_time
                 vehicle_end_data[veh_id]["vtype"] = traci.vehicle.getTypeID(veh_id)
     traci.close()
+    client.loop_stop()
+    client.disconnect()
     write_vehicle_end_data_to_csv(vehicle_end_data)
+    print("Simulation complete. Vehicle log saved.")
