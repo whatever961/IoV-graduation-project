@@ -88,5 +88,8 @@ client.on_connect = on_connect
 client.on_message = on_message
 
 # Connect to the broker
-client.connect("127.0.0.1", 1883, 60)
-client.loop_forever()
+try:
+    client.connect("127.0.0.1", 1883, 60)
+    client.loop_forever()
+except Exception as e:
+    print(f"MQTT client failed to start: {e}")
