@@ -8,7 +8,21 @@ from io import StringIO
 import time
 import func
 
-
+vehicle_base_state = {}
+vehicle_last_factor = {}
+def cache_base_state(veh):
+    vid = veh["id"]
+    if vid not in vehicle_base_state:
+        vehicle_base_state[vid] = {
+            "accel": veh["accel"],
+            "decel": veh["decel"],
+            "max_speed": veh["max_speed"],
+            "tau": veh["tau"],
+            "min_gap": veh["min_gap"],
+            "speed_mode": veh["speed_mode"],
+            "vtype": veh["vtype"]
+        }
+        
 """
 Used for connecting database,
 now only support mysql and postgresql
@@ -153,22 +167,51 @@ def OBUProcessData(cloud_data):
 def setOption(weather_factor, vehicles, congested_edges): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce
     vehicle = None
+    sensitivity_table = {
+        "aggressive": {"speed": 0.3, "accel": 0.3, "decel": 0.3, "tau": 0.5, "gap": 0.5},
+        "normal":     {"speed": 1.0, "accel": 1.0, "decel": 1.0, "tau": 1.0, "gap": 1.0},
+        "cautious":   {"speed": 1.5, "accel": 1.5, "decel": 1.5, "tau": 1.8, "gap": 1.8}
+    }
     option = []
     for veh in vehicles:
+        vid = veh["id"]
+        cache_base_state(veh)
+        base = vehicle_base_state[vid]
+        vtype = veh.get("vtype", "normal")
+        sens = sensitivity_table.get(vtype, sensitivity_table["normal"])
+        last_factor = vehicle_last_factor.get(vid, None)
+        # Only update if the weather factor has changed
+        if last_factor == weather_factor:
+            continue  # No need to adjust again
+
+        vehicle_last_factor[vid] = weather_factor  # Update tracking
+        
+        # Adjust from base, not current
         """
         Shorter accel, decel, max_speed
         Longer tau, min_gap
         """
-        adj_accel = (1 + weather_factor) * veh.get("accel")
-        adj_decel = (1 + weather_factor) * veh.get("decel")
-        adj_max_speed = (1 + weather_factor) * veh.get("max_speed")
-        adj_speed = (1 + weather_factor) * veh.get("speed")
-        speed_mode = veh.get("speed_mode")
-        adj_tau = (1 - weather_factor) * veh.get("tau")
-        adj_min_gap = (1 - weather_factor) * veh.get("min_gap")
-        
+        factor = 1 + (weather_factor * sens["speed"])
+        factor_tau = 1 - (weather_factor * sens["tau"])
+        factor_gap = 1 - (weather_factor * sens["gap"])
+        factor_accel = 1 + (weather_factor * sens["accel"])
+        factor_decel = 1 + (weather_factor * sens["decel"])
+
+        """
+        Another IMPORTANT: if use setSpeed() in SUMO,
+        it only apply for 1 step size. It's not persistent.
+        So in my case it should use setMaxSpeed() to react
+        the weather change.
+        """
+        adj_accel = factor_accel * base["accel"]
+        adj_decel = factor_decel * base["decel"]
+        adj_max_speed = factor * base["max_speed"]
+        adj_tau = factor_tau * base["tau"]
+        adj_min_gap = factor_gap * base["min_gap"]
+        speed_mode = base["speed_mode"]
+
         vehicle = func.Vehicle(
-            vehID=veh.get("id"),
+            vehID=vid,
             safeDist=adj_min_gap,
             accel=adj_accel,
             decel=adj_decel,
@@ -180,35 +223,3 @@ def setOption(weather_factor, vehicles, congested_edges):
         option.append(vehicle)
 
     return option
-
-'''
-if __name__ == "__main__":
-    collision_list = []
-    collision_file = open("collide_log", "ra")
-
-    #Start simulation
-    traci.start(["sumo-gui", "-c", "map.sumo.cfg"])
-    while traci.simulation.getMinExpectedNumber()>0:
-        if traci.simulation.getCurrentTime()%900000==0: #get new data every 15 minutes
-            cloud_data = fetchExternalData("https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=CWA-7B465ABE-F54D-4231-ABB4-D62EEFC1F684&format=JSON&StationId=466930,466910,466920,CAAH60,A0A460,AOA010,G2AI50&WeatherElement=Weather,VisibilityDescription,Now&GeoInfo=CountyName,TownName")
-            #rain_data = fetchExternalData("https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=CWA-7B465ABE-F54D-4231-ABB4-D62EEFC1F684&format=JSON&StationId=466930,466910,466920,CAAH60,A0A460,AOA010,G2AI50&RainfallElement=Past10Min,Past1hr&GeoInfo=CountyName,TownName")
-            if cloud_data is None:
-                p = input("No weather data found.\nContinue simulation without adjusting factors?(y/n)")
-                if p == "n":
-                    try:
-                        os._exit(0)
-                    except:
-                        print("die")
-            weather_factor = OBUProcessData(cloud_data)
-            option = setOption(weather_factor)
-            adjustDrivingEnv(option)
-        traci.simulation.step()
-        #If there's a car accident, record ID of cars
-        #if(traci.getCollidingVehiclesNumber()>0):
-            #collision_list.append(traci.getCollidingVehiclesIDList())
-    traci.close()
-
-    #Write log file base on whatever the fuck we got(not implement yet)
-
-    collision_file.close()
-'''
