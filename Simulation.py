@@ -9,13 +9,16 @@ from io import StringIO
 import paho.mqtt.client as mqtt
 import time
 import func
+from monitor import Monitor
 
-NUM_PCS = 16  # Number of PC to be distributed
+NUM_PCS = 16  # Number of PC to be distributed (default)
 ACK_TIMEOUT = 2  # seconds
-
 acks_received = set()
 vehicle_end_data = {}
 congested_edge = None
+mqtt_sent_now = 0
+mqtt_recv_now = 0
+step_counter = 5 # Log to monitor csv once a while, if change this then remember change the reset value at the end
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -67,6 +70,8 @@ def write_vehicle_end_data_to_csv(stats_dict, filename="vehicle_log.csv"):
 def on_ack(client, userdata, msg):
     group_id = msg.topic.split("/")[-1]  # e.g. controller/ack/pc2
     acks_received.add(group_id)
+    global mqtt_recv_now
+    mqtt_recv_now += monitor.estimate_mqtt_packet(msg.topic, msg.payload.decode())
     try:
         ack = json.loads(msg.payload.decode())
     except Exception as e:
@@ -118,6 +123,7 @@ if __name__ == "__main__":
     #Start simulation
     sumo_binary = "sumo" if args.nogui else "sumo-gui"
     traci.start([sumo_binary, "-c", "map.sumo.cfg"])
+    monitor = Monitor(interval=1.0, logfile="monitor_log.csv")
     while traci.simulation.getMinExpectedNumber()>0:
         #Split and distribute simulation data
         vehicle_ids = traci.vehicle.getIDList()
@@ -133,6 +139,7 @@ if __name__ == "__main__":
             group_data = [get_vehicle_state(vid, congested_edge) for vid in group]
             topic = f"controller/send/pc{i}"
             client.publish(topic, json.dumps(group_data))
+            mqtt_sent_now += monitor.estimate_mqtt_packet(topic, payload)
             active_acks.add(f"pc{i}")
             
         # Wait for ACKs from all vehicles or timeout
@@ -144,7 +151,7 @@ if __name__ == "__main__":
             time.sleep(0.01)
             is_timeout = True
 
-        if is_timeout == True:
+        if is_timeout:
             print("WARNING: Some OBUs did not respond in time!")
 
         #Continue simulation
@@ -175,7 +182,16 @@ if __name__ == "__main__":
             if veh_id in vehicle_end_data:
                 vehicle_end_data[veh_id]["reach_time"] = current_time
                 vehicle_end_data[veh_id]["vtype"] = traci.vehicle.getTypeID(veh_id)
+        step_counter -= 1
+        if step_counter == 0:
+            monitor.log(sim_time=current_time, mqtt_sent_now=mqtt_sent_now, mqtt_recv_now=mqtt_recv_now)
+            mqtt_sent_now = 0
+            mqtt_recv_now = 0
+            step_counter = 5
+    
     traci.close()
+    monitor.end_time = time.time()
+    monitor.save()
     client.loop_stop()
     client.disconnect()
     write_vehicle_end_data_to_csv(vehicle_end_data)
