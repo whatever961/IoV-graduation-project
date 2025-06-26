@@ -1,0 +1,5 @@
+<vTypeDistribution id="mixedDrivers">
+    <vType id="aggressive" accel="3.0" decel="6.0" sigma="0.2" tau="0.8" maxSpeed="30" probability="0.2" color="255,0,0"/>
+    <vType id="normal" accel="2.6" decel="4.5" sigma="0.5" tau="1.0" maxSpeed="25" probability="0.6" color="0,0,255"/>
+    <vType id="cautious" accel="1.0" decel="2.0" sigma="0.8" tau="1.4" maxSpeed="15" probability="0.2" color="0,255,0"/>
+</vTypeDistribution>
