@@ -44,10 +44,9 @@ def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=4, min_occupan
 
         if (count >= min_vehicle_count and
             speed < max_speed * threshold_ratio and
-            occupancy > min_occupancy and
-            (count / length) > 0.2):
+            occupancy > min_occupancy):
             congested_lanes.append(lane_id)
-            print(f"[CONGESTED] {lane_id}: speed={speed:.2f}, occ={occupancy:.2f}, dens={count/length:.2f}")
+            print(f"[CONGESTED] {lane_id}: mean speed={speed:.2f}, occ={occupancy:.2f}")
 
     return lanes_to_edges(congested_lanes)
 
@@ -139,6 +138,7 @@ if __name__ == "__main__":
                 continue
             group_data = [get_vehicle_state(vid, congested_edge) for vid in group]
             topic = f"controller/send/pc{i}"
+            payload = json.dumps(group_data)
             client.publish(topic, json.dumps(group_data))
             mqtt_sent_now += monitor.estimate_mqtt_packet(topic, payload)
             active_acks.add(f"pc{i}")
@@ -167,6 +167,7 @@ if __name__ == "__main__":
             # Initialize tracking entry if new
             if veh_id not in vehicle_end_data:
                 vehicle_end_data[veh_id] = {
+                    "vtype": traci.vehicle.getTypeID(veh_id),
                     "start_time": current_time,
                     "reach_time": None,
                     "num_of_stops": 0,
@@ -182,7 +183,6 @@ if __name__ == "__main__":
         for veh_id in traci.simulation.getArrivedIDList():
             if veh_id in vehicle_end_data:
                 vehicle_end_data[veh_id]["reach_time"] = current_time
-                vehicle_end_data[veh_id]["vtype"] = traci.vehicle.getTypeID(veh_id)
         step_counter -= 1
         if step_counter == 0:
             monitor.log(sim_time=current_time, mqtt_sent_now=mqtt_sent_now, mqtt_recv_now=mqtt_recv_now)
