@@ -12,7 +12,7 @@ import func
 import argparse
 from monitor import Monitor
 
-NUM_PCS = 16  # Number of PC to be distributed (default)
+NUM_OBUS = 16  # Number of PC to be distributed (default)
 ACK_TIMEOUT = 2  # seconds
 acks_received = set()
 vehicle_end_data = {}
@@ -23,7 +23,7 @@ step_counter = 5 # Log to monitor csv once a while, if change this then remember
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pcs", type=int, default=16, help="Number of OBUs (PCs, datatype=int)")
+    parser.add_argument("--obus", type=int, default=16, help="Number of OBUs (PCs, datatype=int)")
     parser.add_argument("--reroute_period", type=float, default=10.0, help="Time interval between reroutes (seconds, datatype=float)")
     parser.add_argument("--nogui", action="store_true", help="Run SUMO without GUI")
     return parser.parse_args()
@@ -82,6 +82,23 @@ def on_ack(client, userdata, msg):
     if option is not None :
         func.adjustDrivingEnv(option, userdata)
 
+def vehicle_sense_env(veh_id):
+    pos = traci.vehicle.getPosition(veh_id)
+    speed = traci.vehicle.getSpeed(veh_id)
+    leader = traci.vehicle.getLeader(veh_id, 100)
+    angle = traci.vehicle.getAngle(veh_id)
+    return {
+        "id": veh_id,
+        "position": pos,
+        "speed": speed,
+        "angle": angle,
+        "leader": {
+            "id": leader[0] if leader else None,
+            "gap": leader[1] if leader else None
+        }
+    }
+
+"""
 def get_vehicle_state(veh_id, congested_edge):
     return {
         "id": veh_id,
@@ -102,7 +119,7 @@ def get_vehicle_state(veh_id, congested_edge):
         "route": traci.vehicle.getRoute(veh_id),
         "congested_edge": congested_edge
     }
-
+"""
 # Initialize the client
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.username_pw_set("rw", "readwrite")
@@ -117,7 +134,7 @@ if __name__ == "__main__":
     is_timeout = False
     active_acks = set()
     args = parse_args()
-    NUM_PCS = args.pcs
+    NUM_OBUS = args.obus
     reroute_period = args.reroute_period
 
     #Start simulation
@@ -127,19 +144,15 @@ if __name__ == "__main__":
     while traci.simulation.getMinExpectedNumber()>0:
         #Split and distribute simulation data
         vehicle_ids = traci.vehicle.getIDList()
-        vehicle_groups = func.split_vehicles(vehicle_ids, NUM_PCS)
-        # Send vehicle states to each OBU
-        current_time = traci.simulation.getTime()
-        if current_time % reroute_period==0.0:
-            congested_edge = detect_congested_edges()
+        vehicle_groups = func.split_vehicles(vehicle_ids, NUM_OBUS)
 
         for i, group in enumerate(vehicle_groups):
             if not group:
                 continue
-            group_data = [get_vehicle_state(vid, congested_edge) for vid in group]
+            group_data = [vehicle_sense_env(vid) for vid in group]
             topic = f"controller/send/pc{i}"
             payload = json.dumps(group_data)
-            client.publish(topic, json.dumps(group_data))
+            client.publish(topic, payload)
             mqtt_sent_now += monitor.estimate_mqtt_packet(topic, payload)
             active_acks.add(f"pc{i}")
             
