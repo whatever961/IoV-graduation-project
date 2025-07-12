@@ -164,62 +164,37 @@ def OBUProcessData(cloud_data):
     return weighted_weather
 
 
-def setOption(weather_factor, vehicles, congested_edges): 
+def setOption(data, weather_factor, vehicles): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce
-    vehicle = None
-    sensitivity_table = {
-        "aggressive": {"speed": 0.3, "accel": 0.3, "decel": 0.3, "tau": 0.5, "gap": 0.5},
-        "normal":     {"speed": 1.0, "accel": 1.0, "decel": 1.0, "tau": 1.0, "gap": 1.0},
-        "cautious":   {"speed": 1.5, "accel": 1.5, "decel": 1.5, "tau": 1.8, "gap": 1.8}
+    my_speed = data["speed"]
+    lane_id = data["lane_id"]
+    leader = data["leader"]
+    leader_speed = data["leader_speed"]
+    road_limit = data["speed_limit"]
+
+    safe_gap = 8.0  # meters
+    boost = 2.0  # m/s
+    min_follow_speed = 5.5  # don't slow too much
+
+    target_speed = my_speed
+
+    if leader["id"]:
+        gap = leader["gap"]
+
+        if gap < safe_gap:
+            # Need to slow down gently
+            target_speed = leader_speed * 0.9
+        elif gap > safe_gap + 10:
+            # Can boost slightly, but not over limit
+            target_speed = min(my_speed + boost, road_limit)
+    elif my_speed < road_limit:
+        # No leader — cruise or speed up slightly if under limit
+        target_speed = min(road_limit, my_speed + 1.5)
+
+    # Smooth adjustment
+    duration = max(1.0, abs(my_speed - target_speed) / 2.5)  # ~2.5 m/s² comfortable acceleration
+
+    return {
+        "target_speed": target_speed,
+        "duration": duration
     }
-    option = []
-    for veh in vehicles:
-        vid = veh["id"]
-        cache_base_state(veh)
-        base = vehicle_base_state[vid]
-        vtype = veh.get("vtype", "normal")
-        sens = sensitivity_table.get(vtype, sensitivity_table["normal"])
-        last_factor = vehicle_last_factor.get(vid, None)
-        # Only update if the weather factor has changed
-        if last_factor == weather_factor:
-            continue  # No need to adjust again
-
-        vehicle_last_factor[vid] = weather_factor  # Update tracking
-        
-        # Adjust from base, not current
-        """
-        Shorter accel, decel, max_speed
-        Longer tau, min_gap
-        """
-        factor = 1 + (weather_factor * sens["speed"])
-        factor_tau = 1 - (weather_factor * sens["tau"])
-        factor_gap = 1 - (weather_factor * sens["gap"])
-        factor_accel = 1 + (weather_factor * sens["accel"])
-        factor_decel = 1 + (weather_factor * sens["decel"])
-
-        """
-        Another IMPORTANT: if use setSpeed() in SUMO,
-        it only apply for 1 step size. It's not persistent.
-        So in my case it should use setMaxSpeed() to react
-        the weather change.
-        """
-        adj_accel = factor_accel * base["accel"]
-        adj_decel = factor_decel * base["decel"]
-        adj_max_speed = factor * base["max_speed"]
-        adj_tau = factor_tau * base["tau"]
-        adj_min_gap = factor_gap * base["min_gap"]
-        speed_mode = base["speed_mode"]
-
-        vehicle = func.Vehicle(
-            vehID=vid,
-            safeDist=adj_min_gap,
-            accel=adj_accel,
-            decel=adj_decel,
-            speedMode=speed_mode,
-            maxSpeed=adj_max_speed,
-            response=adj_tau,
-            reroute=func.should_reroute(veh.get("current_road"), veh.get("route"), congested_edges)
-        )
-        option.append(vehicle)
-
-    return option
