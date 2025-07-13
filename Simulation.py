@@ -87,11 +87,15 @@ def vehicle_sense_env(veh_id):
     speed = traci.vehicle.getSpeed(veh_id)
     leader = traci.vehicle.getLeader(veh_id, 100)
     angle = traci.vehicle.getAngle(veh_id)
+    lane_id = traci.vehicle.getLaneID(veh_id)
+    speed_limit = traci.lane.getMaxSpeed(lane_id)
     return {
         "id": veh_id,
         "position": pos,
         "speed": speed,
+        "speed_limit": speed_limit,
         "angle": angle,
+        "lane_id": lane_id,
         "leader": {
             "id": leader[0] if leader else None,
             "gap": leader[1] if leader else None
