@@ -164,13 +164,13 @@ def OBUProcessData(cloud_data):
     return weighted_weather
 
 
-def setOption(data, weather_factor, vehicles): 
+def setOption(weather_factor, vehicles): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce
-    my_speed = data["speed"]
-    lane_id = data["lane_id"]
-    leader = data["leader"]
-    leader_speed = data["leader_speed"]
-    road_limit = data["speed_limit"]
+    my_speed = vehicles["speed"]
+    lane_id = vehicles["lane_id"]
+    leader = vehicles["leader"]
+    leader_speed = vehicles["leader_speed"]
+    road_limit = vehicles["speed_limit"]
 
     safe_gap = 8.0  # meters
     boost = 2.0  # m/s
