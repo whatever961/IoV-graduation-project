@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-07-15 23:17:25 by Eclipse SUMO netedit Version 1.22.0
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <!-- Vehicles, persons and containers (sorted by depart) -->
+    <trip id="t_0" depart="0.00" from="E26" to="E26" via="E25 E23 E26 E28 E26 E25 E20 E23 E21 E27 E26 E27 E26 E24 E25 E20 E29 E22 E24 E31 E30 E23 E27 E26 E27"/>
+    <trip id="t_1" depart="0.00" from="E23" to="E30" via="E21 E25 E21 E25 E24 E25 E27 E26 E30 E21 E29 E30 E27 E29 E24 E21 E24 E31 E24 E21 E24 E28 E24 E23 E24 E23 E24"/>
+    <trip id="t_10" depart="0.00" from="E23" to="E25" via="E27 E28 E22 E21 E29 E27 E26 E21 E28 E22 E23 E29 E27 E20 E23 E28 E31 E28 E26 E24 E29 E24 E31"/>
+    <trip id="t_11" depart="0.00" from="E31" to="E21" via="E22 E28 E30 E26 E25 E31 E28 E23 E20 E24 E26 E23 E27 E21 E26 E28 E30 E21 E24 E28 E26 E21 E26"/>
+    <trip id="t_12" depart="0.00" from="E23" to="E31" via="E21 E28 E30 E29 E20 E30 E25 E20 E24 E20 E30 E22 E29 E26 E23 E30 E24 E29 E31 E20 E29 E20 E29"/>
+    <trip id="t_13" depart="0.00" from="E20" to="E23" via="E28 E30 E20 E29 E30 E29 E22 E23 E25 E22 E25 E30 E25 E28 E31 E22 E24 E20 E23 E31 E26 E31 E29"/>
+    <trip id="t_14" depart="0.00" from="E20" to="E30" via="E29 E28 E25 E24 E29 E28 E24 E23 E31 E23 E22 E29 E31 E24 E20 E26 E31 E21 E26 E20 E31 E29 E26"/>
+    <trip id="t_15" depart="0.00" from="E28" to="E25" via="E26 E23 E22 E28 E24 E25 E27 E20 E30 E31 E23 E31 E22 E23 E21 E24 E28 E31 E30 E23 E27 E30 E29"/>
+    <trip id="t_16" depart="0.00" from="E24" to="E21" via="E25 E27 E29 E23 E21 E25 E30 E28 E27 E24 E30 E25 E29 E27 E22 E29 E21 E31 E23 E29 E22 E30 E25"/>
+    <trip id="t_17" depart="0.00" from="E31" to="E28" via="E24 E20 E24 E27 E28 E25 E27 E24 E28 E22 E27 E30 E26 E30 E21 E22 E30 E27 E29 E27 E29 E25 E20"/>
+    <trip id="t_18" depart="0.00" from="E23" to="E29" via="E24 E22 E24 E26 E25 E28 E20 E23 E22 E28 E25 E22 E23 E28 E31 E21 E31 E28 E25 E29 E25 E31 E26"/>
+    <trip id="t_19" depart="0.00" from="E25" to="E20" via="E31 E27 E26 E23 E25 E31 E27 E29 E31 E30 E28 E30 E22 E24 E30 E23 E27 E24 E23 E20 E21 E30 E22"/>
+    <trip id="t_2" depart="0.00" from="E24" to="E31" via="E28 E26 E22 E30 E21 E30 E24 E20 E21 E27 E21 E20 E27 E29 E27 E25 E21 E24 E30 E22 E29 E23 E20 E24 E30 E20 E27 E28"/>
+    <trip id="t_20" depart="0.00" from="E21" to="E20" via="E24 E22 E25 E23 E28 E26 E24 E21 E24 E29 E22 E20 E24 E22 E31 E28 E30 E27 E30 E26 E28 E24 E21"/>
+    <trip id="t_21" depart="0.00" from="E30" to="E26" via="E27 E23 E25 E20 E22 E28 E23 E22 E21 E30 E23 E31 E28 E23 E28 E27 E22 E25 E21 E25 E31 E27 E23"/>
+    <trip id="t_22" depart="0.00" from="E23" to="E21" via="E21 E24 E22 E27 E29 E21 E27 E25 E31 E24 E20 E30 E20 E21 E24 E20 E30 E28 E27 E26 E31 E22 E20"/>
+    <trip id="t_23" depart="0.00" from="E26" to="E21" via="E22 E28 E20 E29 E27 E24 E25 E23 E22 E20 E28 E25 E22 E20 E22 E27 E25 E21 E30 E28 E30 E22 E30"/>
+    <trip id="t_24" depart="0.00" from="E21" to="E25" via="E28 E22 E25 E29 E26 E27 E30 E24 E28 E20 E21 E26 E30 E25 E28 E30 E21 E28 E24 E29 E25 E21 E29"/>
+    <trip id="t_3" depart="0.00" from="E29" to="E23" via="E27 E26 E23 E20 E30 E24 E23 E27 E20 E22 E23 E25 E31 E30 E20 E24 E23 E27 E24 E29 E30 E26 E25 E21 E23 E28 E30 E27"/>
+    <trip id="t_4" depart="0.00" from="E29" to="E26" via="E21 E24 E25 E24 E27 E23 E30 E22 E24 E28 E25 E27 E25 E31 E21 E28 E26 E21 E30 E26 E24 E25 E29"/>
+    <trip id="t_5" depart="0.00" from="E23" to="E28" via="E25 E26 E23 E25 E31 E30 E29 E30 E20 E29 E31 E24 E21 E20 E30 E25 E23 E20 E28 E21 E31 E25 E26"/>
+    <trip id="t_6" depart="0.00" from="E27" to="E31" via="E21 E22 E29 E30 E24 E20 E26 E21 E24 E31 E21 E29 E25 E24 E30 E21 E29 E21 E24 E30 E27 E24 E27"/>
+    <trip id="t_7" depart="0.00" from="E30" to="E27" via="E23 E21 E23 E28 E21 E31 E21 E28 E30 E27 E21 E30 E21 E31 E26 E29 E26 E21 E31 E30 E21 E31 E23"/>
+    <trip id="t_8" depart="0.00" from="E26" to="E20" via="E25 E30 E27 E23 E27 E21 E26 E25 E24 E20 E23 E27 E21 E28 E24 E28 E29 E27 E30 E29 E28 E26 E24"/>
+    <trip id="t_9" depart="0.00" from="E30" to="E21" via="E25 E23 E22 E24 E31 E27 E20 E22 E25 E31 E24 E30 E26 E20 E31 E20 E23 E30 E28 E27 E29 E26 E31"/>
+</routes>

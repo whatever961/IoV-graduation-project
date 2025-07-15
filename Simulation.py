@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
     #Start simulation
     sumo_binary = "sumo" if args.nogui else "sumo-gui"
-    traci.start([sumo_binary, "-c", "map.sumo.cfg"])
+    traci.start([sumo_binary, "-c", "map.sumo.cfg"])    # change "map.sumo.cfg" to "test_route.sumocfg" and can use test route
     monitor = Monitor(interval=1.0, logfile="monitor_log.csv")
     while traci.simulation.getMinExpectedNumber()>0:
         #Split and distribute simulation data
