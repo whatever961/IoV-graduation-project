@@ -66,7 +66,7 @@ def on_message(client, userdata, msg):
         #weather_factor = OBUProcessData(cloud_data)
         weather_factor = 0 # 晴天(0) 雨天(-0.15)
         for vehicle in assigned_vehicles:
-            option = Strategy.setOption(weather_factor, assigned_vehicles)
+            option = Strategy.setOption(weather_factor, vehicle)
             ack_topic = f"controller/ack/pc{args.pc_topic_id}"
             client.publish(ack_topic, json.dumps({"option": option}, cls=func.AdvancedJSONEncoder))
 
