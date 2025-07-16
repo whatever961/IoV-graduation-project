@@ -164,13 +164,13 @@ def OBUProcessData(cloud_data):
     return weighted_weather
 
 
-def setOption(weather_factor, vehicles): 
+def setOption(weather_factor, vehicle): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce
-    my_speed = vehicles["speed"]
-    lane_id = vehicles["lane_id"]
-    leader = vehicles["leader"]
-    leader_speed = vehicles["leader_speed"]
-    road_limit = vehicles["speed_limit"]
+    my_speed = vehicle["speed"]
+    lane_id = vehicle["lane_id"]
+    leader = vehicle["leader"]
+    leader_speed = vehicle["leader_speed"]
+    road_limit = vehicle["speed_limit"]
 
     safe_gap = 8.0  # meters
     boost = 2.0  # m/s
@@ -195,6 +195,7 @@ def setOption(weather_factor, vehicles):
     duration = max(1.0, abs(my_speed - target_speed) / 2.5)  # ~2.5 m/s² comfortable acceleration
 
     return {
+        "veh_id": vehicle["veh_id"],
         "target_speed": target_speed,
         "duration": duration
     }
