@@ -120,13 +120,9 @@ bit6: Disregard speed limit.
 # option 改用 class 的 list
 def adjustDrivingEnv(option, end_data):
     for i in option:
-        traci.vehicle.setAccel(i.get("vehID"), i.get("accel"))
-        traci.vehicle.setDecel(i.get("vehID"), i.get("decel"))
-        traci.vehicle.setSpeedMode(i.get("vehID"), i.get("speedMode"))
-        traci.vehicle.setMaxSpeed(i.get("vehID"), i.get("maxSpeed"))
-        traci.vehicle.setMinGap(i.get("vehID"), i.get("safeDist"))
-        traci.vehicle.setTau(i.get("vehID"), i.get("response"))
-        if i.get("reroute") != False:
+        traci.vehicle.slowDown(i.get["veh_id"], i.get["target_speed"], i.get["duration"])
+        traci.vehicle.setColor(i.get("vehID"), (114, 51, 4, 191))
+        '''if i.get("reroute") != False:
             try:
                 traci.vehicle.rerouteTraveltime(i.get("vehID"))  
                 traci.vehicle.setColor(i.get("vehID"), (255, 128, 0, 255))  # mark rerouted cars
@@ -134,6 +130,7 @@ def adjustDrivingEnv(option, end_data):
                 print(f"[Smart Reroute] {i.get('vehID')}")
             except Exception as e:
                 print(f"Reroute failed for {i.get('vehID')}: {e}")
+        '''
 
 def split_vehicles(vehicle_ids, num_obus):
     return [vehicle_ids[i::num_obus] for i in range(num_obus)]
