@@ -85,13 +85,13 @@ def on_ack(client, userdata, msg):
 def vehicle_sense_env(veh_id):
     pos = traci.vehicle.getPosition(veh_id)
     speed = traci.vehicle.getSpeed(veh_id)
-    leader = traci.vehicle.getLeader(veh_id, 100)
+    leader = traci.vehicle.getLeader(veh_id, 100) # Detect leader 100m ahead
     angle = traci.vehicle.getAngle(veh_id)
     lane_id = traci.vehicle.getLaneID(veh_id)
     speed_limit = traci.lane.getMaxSpeed(lane_id)
     current_time = traci.simulation.getTime()
     return {
-        "id": veh_id,
+        "veh_id": veh_id,
         "position": pos,
         "speed": speed,
         "speed_limit": speed_limit,
