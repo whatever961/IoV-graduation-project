@@ -133,7 +133,7 @@ def setOption(weather_factor, vehicle):
 
     target_speed = my_speed
 
-    if leader["id"]:
+    if leader is not None and leader["id"]:
         gap = leader["gap"]
 
         if gap < safe_gap:
