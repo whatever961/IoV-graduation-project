@@ -90,6 +90,12 @@ def vehicle_sense_env(veh_id):
     lane_id = traci.vehicle.getLaneID(veh_id)
     speed_limit = traci.lane.getMaxSpeed(lane_id)
     current_time = traci.simulation.getTime()
+    
+    # Default fallback speed in case no leader exists
+    leader_id = leader[0] if leader else None
+    leader_gap = leader[1] if leader else None
+    leader_speed = traci.vehicle.getSpeed(leader_id) if leader_id else None
+    
     return {
         "veh_id": veh_id,
         "position": pos,
@@ -99,9 +105,10 @@ def vehicle_sense_env(veh_id):
         "lane_id": lane_id,
         "current_time": current_time,
         "leader": {
-            "id": leader[0] if leader else None,
-            "gap": leader[1] if leader else None
-        }
+            "id": leader_id,
+            "gap": leader_gap
+        },
+        "leader_speed": leader_speed
     }
 
 """
