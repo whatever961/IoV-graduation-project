@@ -22,51 +22,6 @@ def cache_base_state(veh):
             "speed_mode": veh["speed_mode"],
             "vtype": veh["vtype"]
         }
-        
-"""
-Used for connecting database,
-now only support mysql and postgresql
-def connectDB(db_type = "mysql", db_name, user, password, host, port):
-    match db_type:
-        case "mysql":
-            if host is None:
-                print("host is not specified")
-            if user is None:
-                print("user is not specified")
-            if db_name is None:
-                print("database name is not specified")
-            conn=mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=db_name
-            )
-            cursor=conn.cursor()
-
-            cursor.close()
-            conn.close()
-        case "postgresql":
-            if host is None:
-                print("host is not specified")
-            if user is None:
-                print("user is not specified")
-            if db_name is None:
-                print("database name is not specified")
-            conn = psycopg2.connect(
-            dbname = db_name,
-            user = user,
-            password = password,
-            host = host,
-            port = port
-            )
-            cursor = conn.cursor()
-
-            cursor.close()
-            conn.close()
-        case _:
-            print("Database not support")
-    return
-"""
 
 
 """
