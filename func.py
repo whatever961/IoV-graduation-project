@@ -119,9 +119,19 @@ bit6: Disregard speed limit.
 
 # option 改用 class 的 list
 def adjustDrivingEnv(option, end_data):
-    for i in option:
-        traci.vehicle.slowDown(i.get["veh_id"], i.get["target_speed"], i.get["duration"])
-        traci.vehicle.setColor(i.get("vehID"), (114, 51, 4, 191))
+    veh_id = option.get("veh_id")
+    target_speed = option.get("target_speed")
+    duration = option.get("duration")
+
+    if veh_id is None or target_speed is None or duration is None:
+        print(f"[ERROR] Missing key in option: {option}")
+        return
+
+    try:
+        traci.vehicle.slowDown(veh_id, target_speed, duration)
+        traci.vehicle.setColor(veh_id, (114, 51, 4, 191))  # optional visual marker
+    except Exception as e:
+        print(f"[ERROR] Failed to apply driving env for {veh_id}: {e}")
         '''if i.get("reroute") != False:
             try:
                 traci.vehicle.rerouteTraveltime(i.get("vehID"))  
