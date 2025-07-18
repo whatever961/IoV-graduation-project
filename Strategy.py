@@ -194,6 +194,9 @@ def setOption(weather_factor, vehicle):
     # Smooth adjustment
     duration = max(1.0, abs(my_speed - target_speed) / 2.5)  # ~2.5 m/s² comfortable acceleration
 
+    if target_speed == my_speed:
+        return None
+
     return {
         "veh_id": vehicle["veh_id"],
         "target_speed": target_speed,
