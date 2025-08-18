@@ -29,6 +29,7 @@ To get external data from open data site
 Mostly we get weather data
 But it may get various data as long as the URL is valid
 """ 
+"""
 def fetchExternalData(url, headers=None, params=None, timeout=10):
     try:
         response = requests.get(url, headers=headers, params=params, timeout=timeout)
@@ -51,7 +52,8 @@ def fetchExternalData(url, headers=None, params=None, timeout=10):
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data from {url}: {e}")
         return None
-
+"""
+"""
 def parseWeather(weather_str):
     cloud_weight = 1.0  #Default
     weather_weight = 1.0  #Default
@@ -70,7 +72,8 @@ def parseWeather(weather_str):
             break #Take first matched condition
 
     return cloud_weight, weather_weight
-
+"""
+"""
 def averageWeightedWeather(weather_list):
     weighted_weather = 0
     count = 0
@@ -82,7 +85,8 @@ def averageWeightedWeather(weather_list):
     
     #Avoid division by zero
     return weighted_weather / count if count>0 else 1
-
+"""
+"""
 def OBUProcessData(cloud_data):
     if cloud_data is None or "records" not in cloud_data or "Station" not in cloud_data["records"]:
         print("Invalid data format or missing records.")
@@ -103,7 +107,7 @@ def OBUProcessData(cloud_data):
             visibility = "Unknown"
     weighted_weather = averageWeightedWeather(weather_string)
 
-    """
+    
     total_10min = 0
     total_1hr = 0
     count = 0
@@ -115,9 +119,9 @@ def OBUProcessData(cloud_data):
         count += 1
     avg_10min = total_10min / count if count > 0 else 0
     avg_1hr = total_1hr / count if count > 0 else 0
-    """
+    
     return weighted_weather
-
+"""
 
 def setOption(weather_factor, vehicle): 
     #IMPORTANT!!! weather_factor is a NEGATIVE DOUBLE. represent how many % should a variable reduce

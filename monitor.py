@@ -39,4 +39,4 @@ class Monitor:
             writer.writeheader()
             writer.writerows(self.log_data)
         print(f"[Monitor] Log saved to {self.logfile}")
-        print("end_time - start_time = " + (self.end_time - self.start_time))
+        print("end_time - start_time = " + str(self.end_time - self.start_time))

@@ -12,25 +12,26 @@ import func
 import argparse
 from monitor import Monitor
 
-NUM_OBUS = 16  # Number of PC to be distributed (default)
-ACK_TIMEOUT = 2  # seconds
-acks_received = set()
+ACK_TIMEOUT = 2         # seconds
+acks_received = set()   # Acks from OBUs, use for check each OBUs has ack. Use with active_acks
 vehicle_end_data = {}
 congested_edge = None
-mqtt_sent_now = 0
-mqtt_recv_now = 0
-step_counter = 5 # Log to monitor csv once a while, if change this then remember change the reset value at the end
+mqtt_sent_now = 0       # Size of packet sent from Simulation
+mqtt_recv_now = 0       # Size of packet receive from OBU
+step_counter = 5        # Log to monitor csv once a while, if change this then remember change the reset value at the end
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--obus", type=int, default=16, help="Number of OBUs (PCs, datatype=int)")
+    parser.add_argument("--obus", type=int, default=25, help="Number of OBUs (PCs, datatype=int)")
     parser.add_argument("--reroute_period", type=float, default=10.0, help="Time interval between reroutes (seconds, datatype=float)")
     parser.add_argument("--nogui", action="store_true", help="Run SUMO without GUI")
     return parser.parse_args()
 
+# Get each land 
 def lanes_to_edges(lanes):
     return list({traci.lane.getEdgeID(lane_id) for lane_id in lanes})
 
+#
 def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=4, min_occupancy=0.25):
     congested_lanes = []
     for lane_id in traci.lane.getIDList():
@@ -50,6 +51,7 @@ def detect_congested_edges(threshold_ratio=0.7, min_vehicle_count=4, min_occupan
 
     return lanes_to_edges(congested_lanes)
 
+# Record vehicle status
 def write_vehicle_end_data_to_csv(stats_dict, filename="vehicle_log.csv"):
     with open(filename, "w", newline='') as csvfile:
         fieldnames = ["veh_id", "vtype", "start_time", "reach_time", "num_of_stops", "num_of_reroutes"]
@@ -66,9 +68,8 @@ def write_vehicle_end_data_to_csv(stats_dict, filename="vehicle_log.csv"):
                 "num_of_reroutes": stats.get("num_of_reroutes", 0)
             })
 
-
 def on_ack(client, userdata, msg):
-    group_id = msg.topic.split("/")[-1]  # e.g. controller/ack/pc2
+    group_id = msg.topic.split("/")[-1]  # e.g. controller/ack/pc2 -> pc2
     acks_received.add(group_id)
     global mqtt_recv_now
     mqtt_recv_now += monitor.estimate_mqtt_packet(msg.topic, msg.payload.decode())
@@ -82,10 +83,11 @@ def on_ack(client, userdata, msg):
     if option is not None :
         func.adjustDrivingEnv(option, userdata)
 
+# get specific vehicle data
 def vehicle_sense_env(veh_id):
     pos = traci.vehicle.getPosition(veh_id)
     speed = traci.vehicle.getSpeed(veh_id)
-    leader = traci.vehicle.getLeader(veh_id, 100) # Detect leader 100m ahead
+    leader = traci.vehicle.getLeader(veh_id, 100) # Detect leader 100m ahead  #???
     angle = traci.vehicle.getAngle(veh_id)
     lane_id = traci.vehicle.getLaneID(veh_id)
     speed_limit = traci.lane.getMaxSpeed(lane_id)
@@ -147,17 +149,16 @@ if __name__ == "__main__":
     is_timeout = False
     active_acks = set()
     args = parse_args()
-    NUM_OBUS = args.obus
     reroute_period = args.reroute_period
 
     #Start simulation
     sumo_binary = "sumo" if args.nogui else "sumo-gui"
-    traci.start([sumo_binary, "-c", "map.sumo.cfg"])    # change "map.sumo.cfg" to "test_route.sumocfg" and can use test route
+    traci.start([sumo_binary, "-c", "test_route.sumocfg"])    # change "map.sumo.cfg" to "test_route.sumocfg" and can use test map
     monitor = Monitor(interval=1.0, logfile="monitor_log.csv")
     while traci.simulation.getMinExpectedNumber()>0:
         #Split and distribute simulation data
         vehicle_ids = traci.vehicle.getIDList()
-        vehicle_groups = func.split_vehicles(vehicle_ids, NUM_OBUS)
+        vehicle_groups = func.split_vehicles(vehicle_ids, args.obus)
 
         for i, group in enumerate(vehicle_groups):
             if not group:

@@ -10,6 +10,7 @@ import paho.mqtt.client as mqtt
 import time
 import random
 
+"""
 # Define cloud weight mapping
 cloud_mapping = {
     "晴": 1.0,
@@ -39,6 +40,7 @@ weather_mapping = {
     "大雷雹": -0.08,
     "有雷": -0.01,
 }
+"""
 
 #Use for option setting
 class Vehicle:
@@ -61,7 +63,7 @@ class AdvancedJSONEncoder(json.JSONEncoder):
         if isinstance(obj, set):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
-
+"""
 def is_xml(data):
     try:
         ET.fromstring(data)
@@ -76,8 +78,9 @@ def is_csv(data):
         return bool(first_row)  # If it has a first row, it's likely CSV
     except Exception:
         return False
-
+"""
 #Use for fetchExternalData() to detect data format
+"""
 def detectDataFormat(data):
     if isinstance(data, dict):
         return "json"
@@ -86,7 +89,7 @@ def detectDataFormat(data):
     elif is_csv(data):
         return "csv"
     return "text"
-
+"""
 #Use for change Traci
 """
 Use to adjust the sumo driving environment through traci.
@@ -129,7 +132,7 @@ def adjustDrivingEnv(option, end_data):
 
     try:
         traci.vehicle.slowDown(veh_id, target_speed, duration)
-        traci.vehicle.setColor(veh_id, (114, 51, 4, 191))  # optional visual marker
+        traci.vehicle.setColor(veh_id, (255,0,0))  # optional visual marker
     except Exception as e:
         print(f"[ERROR] Failed to apply driving env for {veh_id}: {e}")
         '''if i.get("reroute") != False:
