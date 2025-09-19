@@ -1,5 +1,6 @@
 <vTypeDistribution id="mixedDrivers">
-    <vType id="cacc" accel="2.5" decel="4.0" sigma="0.5" tau="0.6" minGap="3.0" maxSpeed="40" probability="0.2" color="255,0,0"/>
-    <vType id="acc" accel="2.5" decel="4.0" sigma="0.5" tau="0.9" minGap="3.0" maxSpeed="40" probability="0.4" color="0,0,255"/>
-    <vType id="human" accel="2.5" decel="4.0" sigma="0.5" tau="1.2" minGap="3.0" maxSpeed="40" probability="0.4" color="0,255,0"/>
+    <vType id="cacc" accel="2.0" decel="4.0" sigma="0.4" tau="0.6" minGap="3.0" maxSpeed="40" probability="0.2" color="255,0,0"/>
+    <vType id="acc" accel="2.0" decel="4.0" sigma="0.4" tau="0.9" minGap="3.0" maxSpeed="40" probability="0.4" color="0,0,255"/>
+    <vType id="human" accel="2.0" decel="4.0" sigma="0.4" tau="1.2" minGap="3.0" maxSpeed="40" probability="0.4" color="0,255,0"/>
 </vTypeDistribution>
+
